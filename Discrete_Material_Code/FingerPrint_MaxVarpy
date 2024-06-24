@@ -1,0 +1,181 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Apr 15 16:04:33 2024
+
+@author: tang.1856
+"""
+
+
+import torch
+from botorch.models import FixedNoiseGP, SingleTaskGP
+from gpytorch.kernels import ScaleKernel
+from gpytorch.mlls import ExactMarginalLogLikelihood
+from botorch import fit_gpytorch_model
+from scipy.stats import norm
+from botorch.acquisition.analytic import ExpectedImprovement
+import matplotlib.pyplot as plt
+import numpy as np
+import pickle
+import sys
+import time
+from botorch.models.transforms.outcome import Standardize
+from scipy.spatial.distance import cdist, jensenshannon
+import pandas as pd
+from gauche.dataloader import MolPropLoader, ReactionLoader
+from gpytorch.means import ConstantMean
+from gauche.kernels.fingerprint_kernels.tanimoto_kernel import TanimotoKernel
+from gpytorch.distributions import MultivariateNormal
+from sklearn.model_selection import train_test_split
+from gpytorch.likelihoods import GaussianLikelihood
+from botorch import fit_gpytorch_model
+
+class TanimotoGP(SingleTaskGP):
+
+    def __init__(self, train_X, train_Y):
+        super().__init__(train_X, train_Y, likelihood=GaussianLikelihood(), outcome_transform=Standardize(m=1))
+        self.mean_module = ConstantMean()
+        self.covar_module = ScaleKernel(base_kernel=TanimotoKernel())
+        self.to(train_X)  # make sure we're on the right device/dtype
+
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return MultivariateNormal(mean_x, covar_x)
+    
+def initialize_model(train_x, train_obj, state_dict=None):
+    """
+    Initialise model and loss function.
+
+    Args:
+        train_x: tensor of inputs
+        train_obj: tensor of outputs
+        state_dict: current state dict used to speed up fitting
+
+    Returns: mll object, model object
+    """
+
+    # define model for objective
+    model = TanimotoGP(train_x, train_obj).to(train_x)
+    mll = ExactMarginalLogLikelihood(model.likelihood, model)
+    # load state dict if it is passed
+    if state_dict is not None:
+        model.load_state_dict(state_dict)
+
+    return mll, model
+
+def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist = 25):
+    behavior = behavior.squeeze(1).numpy()
+    num = len(behavior)
+    cum_hist, _ = np.histogram(behavior, np.linspace(obj_lb, obj_ub, n_bins + 1))
+    cum_hist = cum_hist[np.nonzero(cum_hist)] / (num) # discrete distribution
+    cum_hist_uni = np.mean(cum_hist) * np.ones_like(cum_hist) # theoretical uniform distribution
+
+    cum_coverage = len(cum_hist) / n_hist
+    cum_uniformity = 1 - jensenshannon(cum_hist, cum_hist_uni, base=2)
+    
+    return cum_coverage, cum_uniformity
+
+def bo_run(X, y, r, BO_iterations, nb_COFs_initialization, which_acquisition):
+    '''This function is based on the following code: https://github.com/gerbswastaken/BayesianOptimizationForMOFs/blob/317f63000bab4b5cddbb34e251a0b334b2f8e561/Python%20Notebooks/bayesian_optimization_hydrogen.ipynb'''
+    assert BO_iterations > nb_COFs_initialization
+    assert which_acquisition in ['max sigma', 'RS']
+    
+    n_hist = float(torch.count_nonzero(torch.histc(y,bins=n_bins)))
+   
+    np.random.seed(r)
+    ids_acquired = np.random.choice(np.arange((len(y))), size=nb_COFs_initialization, replace=False)
+    
+    X_unsqueezed = X.unsqueeze(1)
+    y_acquired = y[ids_acquired]
+     
+    coverage, uniformity = reachability_uniformity(y[ids_acquired], n_bins=n_bins, obj_lb = y.min(), obj_ub = y.max(), n_hist=n_hist)
+    coverage_list = [coverage]   
+    cost_list = [0]
+    
+    for i in range(BO_iterations):
+        
+        # construct and fit GP model
+        mll, model = initialize_model(X[ids_acquired, :].to(torch.float64), y_acquired.to(torch.float64))
+        fit_gpytorch_model(mll)
+      
+        if which_acquisition == "max sigma":
+            with torch.no_grad():
+                acquisition_values = model.posterior(X_unsqueezed).variance.squeeze()
+        elif which_acquisition == "RS":
+            acquisition_values = torch.rand(len(X_unsqueezed))
+        else:
+            raise Exception("not a valid acquisition function")
+
+        # select COF to acquire with maximal aquisition value, which is not in the acquired set already
+        ids_sorted_by_aquisition = acquisition_values.argsort(descending=True)
+        for id_max_aquisition_all in ids_sorted_by_aquisition:
+            if not id_max_aquisition_all.item() in ids_acquired:
+                id_max_aquisition = id_max_aquisition_all.item()
+                break
+
+        # acquire this COF
+        ids_acquired = np.concatenate((ids_acquired, [id_max_aquisition]))
+        
+        y_acquired = y[ids_acquired] # start over to normalize y properly
+        
+        coverage, uniformity = reachability_uniformity(y[ids_acquired], n_bins=n_bins, obj_lb = y.min(), obj_ub = y.max(), n_hist=n_hist)
+        coverage_list.append(coverage)    
+        cost_list.append(cost_list[-1] + len([id_max_aquisition]))
+        
+    
+    return ids_acquired, X[ids_acquired, :], y[ids_acquired], coverage_list, cost_list
+
+
+if __name__ == '__main__':
+    
+    dim = 2133
+    n_bins = 25
+    N_init = 10 # number of initial training data
+    BO_iterations = 200 # iteration time for BO
+    nb_runs = 20 # number of replicate 
+       
+    # Load the Photoswitch dataset
+    loader = MolPropLoader()
+    loader.load_benchmark("ESOL")
+
+    # We use the fragprints representations (a concatenation of Morgan fingerprints and RDKit fragment features)
+    loader.featurize('ecfp_fragprints')
+    # loader.featurize('drfp')
+    X = loader.features
+    y = loader.labels       
+    
+    y = np.reshape(y, (np.size(y), 1)) # for the GP
+       
+    X = torch.from_numpy(X)
+    y = torch.from_numpy(y)
+    
+    
+    coverage_tensor = []
+    cost_tensor = []
+  
+
+    which_acquisition = "RS" # specify acquisition function
+    nb_COFs_initializations = {"RS": [N_init],
+                               "max sigma": [N_init]}
+    
+    
+    for nb_COFs_initialization in nb_COFs_initializations[which_acquisition]: # different initial data point 
+        
+        
+        for r in range(nb_runs): # run different replicate 
+            print("seed=", r)
+           
+            # Run the BO
+            ids_acquired, X_BO, Y_BO, coverage_list,  cost_list = bo_run(X, y, r, BO_iterations, nb_COFs_initialization, which_acquisition)
+            
+            coverage_tensor.append(coverage_list)            
+            cost_tensor.append(cost_list)
+           
+    cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
+   
+    torch.save(coverage_tensor, 'ESOL_coverage_list_RS.pt')
+    torch.save(cost_tensor, 'ESOL_cost_list_RS.pt')  
+  
+    #########################################################################################################################################################################
