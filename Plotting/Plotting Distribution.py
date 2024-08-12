@@ -174,10 +174,10 @@ Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1
 # outcomes = Y_original.numpy()
 
 
-file_path1 = '/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv'
-data1 = pd.read_csv(file_path1)
-y1 = data1['D_N2 (cm2/s)']
-y2 = data1['U_N2 (mol/kg)']
+# file_path1 = '/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv'
+# data1 = pd.read_csv(file_path1)
+# y1 = data1['D_N2 (cm2/s)']
+# y2 = data1['U_N2 (mol/kg)']
 
 Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
 outcomes = Y_original.numpy()

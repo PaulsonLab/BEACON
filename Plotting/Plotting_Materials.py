@@ -9,7 +9,7 @@ Created on Fri Apr 12 13:11:40 2024
 import torch
 import matplotlib.pyplot as plt
 
-synthetic = 'ESOL'
+synthetic = 'DNA'
 cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
 coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
 
@@ -21,6 +21,8 @@ coverage_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Mater
 
 cost_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_xspace.pt')
 coverage_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_xspace.pt')
+
+
 
 coverage_NS_mean_TS1 = torch.mean(coverage_NS_TS1, dim = 0)
 coverage_NS_std_TS1 = torch.std(coverage_NS_TS1, dim = 0)
@@ -39,6 +41,8 @@ coverage_NS_xspace_std = torch.std(coverage_NS_xspace , dim = 0)
 cost_NS_xspace_mean = torch.mean(cost_NS_xspace , dim = 0)
 
 
+
+
 text_size = 24
 marker_size = 18
 linewidth=4
@@ -50,6 +54,7 @@ plt.plot(cost_NS_mean_TS1[::marker_interval], coverage_NS_mean_TS1[::marker_inte
 plt.plot(cost_BO_mean[::marker_interval], coverage_BO_mean[::marker_interval], label='MaxVar', marker='^', markersize=marker_size, linewidth=linewidth)
 plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size,color='mediumpurple', linewidth=linewidth)
 plt.plot(cost_RS_mean[::marker_interval], coverage_RS_mean[::marker_interval], label='RS', marker='v', markersize=marker_size, color='hotpink', linewidth=linewidth)
+
 
 plt.fill_between(cost_NS_mean_TS1, coverage_NS_mean_TS1 - coverage_NS_std_TS1, coverage_NS_mean_TS1 + coverage_NS_std_TS1,  alpha=alpha)
 plt.fill_between(cost_BO_mean, coverage_BO_mean - coverage_BO_std, coverage_BO_mean + coverage_BO_std,  alpha=alpha)

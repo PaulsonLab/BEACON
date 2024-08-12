@@ -141,6 +141,7 @@ if __name__ == '__main__':
     n_bins = 10
     TS = 1 
     k_NN = 10
+    N_output = 2
     
     obj_lb1 = min(y1.values)
     obj_ub1 = max(y1.values)
@@ -190,19 +191,25 @@ if __name__ == '__main__':
         for i in range(BO_iter):        
             
             model_list = []
-            for nx in range(2):
+            for nx in range(N_output):
                 covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim))
                 model_list.append(SingleTaskGP(train_x.to(torch.float64), train_y[:,nx].unsqueeze(1).to(torch.float64), outcome_transform=Standardize(m=1), covar_module=covar_module))
             model = ModelListGP(*model_list)
             mll = SumMarginalLogLikelihood(model.likelihood, model)
+            
             try:
                 fit_gpytorch_mll(mll)
             except:
                 print('Fail to fit GP!')
-            model.models[0].train_x = train_x
-            model.models[0].train_y = train_y[:,0].unsqueeze(1)
-            model.models[1].train_x = train_x
-            model.models[1].train_y = train_y[:,1].unsqueeze(1)
+            
+            for nx in range(N_output):
+                model.models[nx].train_x = train_x
+                model.models[nx].train_y = train_y[:,nx].unsqueeze(1)
+                
+            # model.models[0].train_x = train_x
+            # model.models[0].train_y = train_y[:,0].unsqueeze(1)
+            # model.models[1].train_x = train_x
+            # model.models[1].train_y = train_y[:,1].unsqueeze(1)
             
             
             # Perform optimization on TS posterior sample            

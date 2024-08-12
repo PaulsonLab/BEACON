@@ -143,7 +143,7 @@ if __name__ == '__main__':
     obj_ub = y_original.max() # obj maximum 
     
     for seed in range(replicate):
-        print('seed:',seed)
+        print('seed:',seed+)
         np.random.seed(seed)
         ids_acquired = np.random.choice(np.arange((len(y_original))), size=N_init, replace=False)
         train_x = X_original[ids_acquired]
