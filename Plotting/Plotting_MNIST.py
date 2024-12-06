@@ -43,9 +43,9 @@ reachability_list_RS = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/
 meanRS = np.median(reachability_list_RS, axis=0)
 stdRS = np.std(reachability_list_RS, axis=0)
 
-reachability_list_FS = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NS_FS.pt'))[indice]
-meanFS = np.median(reachability_list_FS, axis=0)
-stdFS = np.std(reachability_list_FS, axis=0)
+# reachability_list_FS = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NS_FS.pt'))[indice]
+# meanFS = np.median(reachability_list_FS, axis=0)
+# stdFS = np.std(reachability_list_FS, axis=0)
 
 reachability_list_GA = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NSEA.pt'))[indice]
 meanGA = np.median(reachability_list_GA, axis=0)
@@ -79,10 +79,10 @@ stdRS = np.std(reachability_list_RS, axis=0)
 max_RS = np.max(reachability_list_RS, axis=0)
 min_RS = np.min(reachability_list_RS, axis=0)
 
-meanFS = np.median(reachability_list_FS, axis=0)
-stdFS = np.std(reachability_list_FS, axis=0)
-max_FS = np.max(reachability_list_FS, axis=0)
-min_FS = np.min(reachability_list_FS, axis=0)
+# meanFS = np.median(reachability_list_FS, axis=0)
+# stdFS = np.std(reachability_list_FS, axis=0)
+# max_FS = np.max(reachability_list_FS, axis=0)
+# min_FS = np.min(reachability_list_FS, axis=0)
 
 meanGA = np.median(reachability_list_GA, axis=0)
 stdGA = np.std(reachability_list_GA, axis=0)
@@ -102,11 +102,11 @@ plt.plot(x, mean_bc, label='BEACON-bc', marker='X', markersize=marker_size, line
 
 # plt.fill_between(x, min_FS, max_FS,  alpha=0.2)
 plt.plot(xGA, meanGA, label='NS-EA', marker='>', markersize=marker_size, linewidth=linewidth,color='#2ca02c')
-plt.plot(x, meanFS, label='NS-FS', marker='p', markersize=marker_size, linewidth=linewidth,color='#9467bd')
+# plt.plot(x, meanFS, label='NS-FS', marker='p', markersize=marker_size, linewidth=linewidth,color='#9467bd')
 plt.plot(x, meanRS, label='RS', marker='v', markersize=marker_size, linewidth=linewidth,color='#e377c2')
 plt.xlabel('Iteration', fontsize=text_size, fontweight=weight)
 plt.ylabel('Number of discovered behaviors', fontsize=text_size, fontweight=weight)
-plt.title('MNIST novelty search in pixel space', fontsize=text_size, fontweight=weight)
+# plt.title('MNIST novelty search in pixel space', fontsize=text_size, fontweight=weight)
 # plt.title('Mean and ±1 Standard Deviation')
 plt.legend(prop={'weight':'bold','size':text_size-4})
 plt.tick_params(axis='both',
@@ -133,7 +133,7 @@ tensors = {
     'BEACON':reachability_list_BEACON[:,-1], 
     'BEACON_bc':reachability_list_BEACON_bc[:,-1], 
     'NS-EA':reachability_list_GA[:,-1],    
-    'NS-FS':reachability_list_FS[:,-1],   
+    # 'NS-FS':reachability_list_FS[:,-1],   
     'RS':reachability_list_RS[:,-1],
       
 }
@@ -181,3 +181,19 @@ ax.spines['left'].set_linewidth(2)
 ax.spines['right'].set_linewidth(2)
 
 plt.show()
+
+
+from scipy.io import savemat
+save_path = "/home/tang.1856/BEACON/BEACON/Plotting/MNIST.mat"
+# Create a dictionary to store all data
+data_dict = {}
+
+# Iterate through datasets and save data
+for i in range(1):
+    data_dict[f'coverage_BEACON_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON.pt'))[indice]
+    data_dict[f'coverage_BEACON_bc_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON_bc.pt'))[indice]
+    data_dict[f'cost_RS_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_RS.pt'))[indice]
+    data_dict[f'coverage_NSEA_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NSEA.pt'))[indice]
+   
+# Save the dictionary to a .mat file
+savemat(save_path, data_dict)

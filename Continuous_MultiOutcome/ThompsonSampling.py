@@ -11,7 +11,7 @@ from math import pi
 from typing import Any, Tuple
 from botorch.models.model import Model
 from botorch.models import SingleTaskGP
-from botorch import fit_gpytorch_model
+# from botorch import fit_gpytorch_model
 from botorch.posteriors import Posterior
 from botorch.models.transforms import Standardize
 from gpytorch.mlls import ExactMarginalLogLikelihood

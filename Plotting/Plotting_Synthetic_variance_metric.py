@@ -93,7 +93,7 @@ marker_interval = 8
 weight='bold'
 alpha = 0.3
 
-# plt.figure(figsize=(16,14))
+plt.figure(figsize=(16,14))
 # plt.grid(color='lightgrey', linewidth=0.5)
 plt.plot(cost_NS_mean_TS1[::marker_interval], coverage_NS_mean_TS1[::marker_interval], label='BEACON', marker='X', markersize=marker_size, linewidth=linewidth)
 plt.plot(cost_BO_mean[::marker_interval], coverage_BO_mean[::marker_interval], label='MaxVar', marker='^', markersize=marker_size, linewidth=linewidth)
@@ -103,7 +103,7 @@ plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marke
 plt.plot(cost_sobol_mean[::marker_interval], coverage_sobol_mean[::marker_interval], label='Sobol', marker='o', markersize=marker_size, linewidth=linewidth )
 plt.plot(cost_RS_mean[::marker_interval], coverage_RS_mean[::marker_interval], label='RS', marker='v', markersize=marker_size, linewidth=linewidth )
 plt.plot(cost_EI_mean[::marker_interval], coverage_EI_mean[::marker_interval], label='EI', marker='*', markersize=marker_size, linewidth=linewidth )
-plt.plot(cost_CMAES_mean, coverage_CMAES_mean, label='CMAES', marker='s', markersize=marker_size, linewidth=linewidth )
+# plt.plot(cost_CMAES_mean, coverage_CMAES_mean, label='CMAES', marker='s', markersize=marker_size, linewidth=linewidth )
 
 plt.fill_between(cost_NS_mean_TS1, coverage_NS_mean_TS1 - coverage_NS_std_TS1, coverage_NS_mean_TS1 + coverage_NS_std_TS1,  alpha=alpha)
 plt.fill_between(cost_BO_mean, coverage_BO_mean - coverage_BO_std, coverage_BO_mean + coverage_BO_std,  alpha=alpha)
@@ -113,12 +113,12 @@ plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspa
 plt.fill_between(cost_sobol_mean, coverage_sobol_mean - coverage_sobol_std, coverage_sobol_mean + coverage_sobol_std,  alpha=alpha)
 plt.fill_between(cost_RS_mean, coverage_RS_mean - coverage_RS_std, coverage_RS_mean + coverage_RS_std,  alpha=alpha)
 plt.fill_between(cost_EI_mean, coverage_EI_mean - coverage_EI_std, coverage_EI_mean + coverage_EI_std,  alpha=alpha)
-plt.fill_between(cost_CMAES_mean, coverage_CMAES_mean - coverage_CMAES_std, coverage_CMAES_mean + coverage_CMAES_std,  alpha=alpha)
+# plt.fill_between(cost_CMAES_mean, coverage_CMAES_mean - coverage_CMAES_std, coverage_CMAES_mean + coverage_CMAES_std,  alpha=alpha)
 
 plt.xlabel('Number of evaluations', fontsize=text_size, fontweight=weight)
 plt.ylabel('Variance of outcomes', fontsize=text_size, fontweight=weight)
-plt.legend(prop={'weight':'bold','size':text_size-8})
-plt.title('8D Ackley - Sharp Landscape',fontsize=text_size+10, fontweight=weight)
+plt.legend(prop={'weight':'bold','size':text_size-4})
+# plt.title('8D Ackley - Sharp Landscape',fontsize=text_size+10, fontweight=weight)
 
 plt.tick_params(axis='both',
                 which='both',

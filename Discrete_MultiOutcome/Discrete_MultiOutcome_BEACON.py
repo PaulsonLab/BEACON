@@ -24,7 +24,7 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+# import torchsort
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
@@ -90,51 +90,51 @@ class CustomAcquisitionFunction(AcquisitionFunction):
 if __name__ == '__main__':
     
     # Case study 1
-    feat = set(
-    ["func-chi-0-all" ,"D_func-S-3-all", "total_SA_volumetric", 
-      "Di", "Dif", "mc_CRY-Z-0-all","total_POV_volumetric","density [g/cm^3]", "total_SA_gravimetric",
-      "D_func-S-1-all","Df", "mc_CRY-S-0-all" ,"total_POV_gravimetric","D_func-alpha-1-all","func-S-0-all",
-      "D_mc_CRY-chi-3-all","D_mc_CRY-chi-1-all","func-alpha-0-all",
-      "D_mc_CRY-T-2-all","mc_CRY-Z-2-all","D_mc_CRY-chi-2-all",
-    "total_SA_gravimetric","total_POV_gravimetric","Di","density [g/cm^3]",
-      "func-S-0-all",
-      "func-chi-2-all","func-alpha-0-all",
-      "total_POV_volumetric","D_func-alpha-1-all","total_SA_volumetric",
-      "func-alpha-1-all",
-      "func-alpha-3-all",
-      "Dif",
-      "Df",
-      "func-chi-3-all", 
-      'Di',
-      'Df',
-      'Dif',
-      'density [g/cm^3]',
-      'total_SA_volumetric',
-      'total_SA_gravimetric',
-      'total_POV_volumetric',
-      'total_POV_gravimetric'
-    ])
+    # feat = set(
+    # ["func-chi-0-all" ,"D_func-S-3-all", "total_SA_volumetric", 
+    #   "Di", "Dif", "mc_CRY-Z-0-all","total_POV_volumetric","density [g/cm^3]", "total_SA_gravimetric",
+    #   "D_func-S-1-all","Df", "mc_CRY-S-0-all" ,"total_POV_gravimetric","D_func-alpha-1-all","func-S-0-all",
+    #   "D_mc_CRY-chi-3-all","D_mc_CRY-chi-1-all","func-alpha-0-all",
+    #   "D_mc_CRY-T-2-all","mc_CRY-Z-2-all","D_mc_CRY-chi-2-all",
+    # "total_SA_gravimetric","total_POV_gravimetric","Di","density [g/cm^3]",
+    #   "func-S-0-all",
+    #   "func-chi-2-all","func-alpha-0-all",
+    #   "total_POV_volumetric","D_func-alpha-1-all","total_SA_volumetric",
+    #   "func-alpha-1-all",
+    #   "func-alpha-3-all",
+    #   "Dif",
+    #   "Df",
+    #   "func-chi-3-all", 
+    #   'Di',
+    #   'Df',
+    #   'Dif',
+    #   'density [g/cm^3]',
+    #   'total_SA_volumetric',
+    #   'total_SA_gravimetric',
+    #   'total_POV_volumetric',
+    #   'total_POV_gravimetric'
+    # ])
 
-    file_path1 = '/home/tang.1856/Downloads/PMOF20K_traindata_7000_train.csv'
-    data1 = pd.read_csv(file_path1)
-    y1 = data1['pure_uptake_CO2_298.00_15000']
-    y2 = data1['pure_uptake_methane_298.00_580000']
+    # file_path1 = '/home/tang.1856/Downloads/PMOF20K_traindata_7000_train.csv'
+    # data1 = pd.read_csv(file_path1)
+    # y1 = data1['pure_uptake_CO2_298.00_15000']
+    # y2 = data1['pure_uptake_methane_298.00_580000']
     
-    lb = torch.tensor(data1[feat].values.min(axis=0))
-    ub = torch.tensor(data1[feat].values.max(axis=0))
-    X_original = (torch.tensor(data1[feat].values) - lb)/(ub-lb)
-    Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
-    
-    # Case study 2
-    # df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv') # data from Boobier et al.
-    # X_original = (df.iloc[:, 1:21]).values
-    # X_original = torch.from_numpy(X_original)    
-    # X_original = (X_original - X_original.min(dim=0).values)/(X_original.max(dim=0).values - X_original.min(dim=0).values) 
-    # y1 = df['U_N2 (mol/kg)']
-    # y2 = df['D_N2 (cm2/s)']   
+    # lb = torch.tensor(data1[feat].values.min(axis=0))
+    # ub = torch.tensor(data1[feat].values.max(axis=0))
+    # X_original = (torch.tensor(data1[feat].values) - lb)/(ub-lb)
     # Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
     
-    dim = 25
+    # Case study 2
+    df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv') # data from Boobier et al.
+    X_original = (df.iloc[:, 1:21]).values
+    X_original = torch.from_numpy(X_original)    
+    X_original = (X_original - X_original.min(dim=0).values)/(X_original.max(dim=0).values - X_original.min(dim=0).values) 
+    y1 = df['U_N2 (mol/kg)']
+    y2 = df['D_N2 (cm2/s)']   
+    Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
+    
+    dim = 20
     N_init = 50
     replicate = 20
     BO_iter = 500

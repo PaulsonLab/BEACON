@@ -29,8 +29,8 @@ Y_original[Y_original<0] = 0
 outcomes = Y_original.numpy()
  
 # # Plotting
-plt.figure()
-plt.scatter(outcomes[:, 0], outcomes[:, 1], alpha=0.5, edgecolors='none', s=4)
+plt.figure(figsize=(3,3),dpi=150)
+plt.scatter(outcomes[:, 0], outcomes[:, 1], alpha=0.5, edgecolors='none', s=1)
 
 cut_x = 60000
 cut_y = 6000
@@ -70,22 +70,22 @@ plt.xlim(min(outcomes[:, 0]),max(outcomes[:, 0]))
 plt.ylim(min(outcomes[:, 1]),max(outcomes[:, 1]))
 
 # # plt.title('Visually Interesting 2D Outcome Space from High-Dimensional Inputs')
-plt.tick_params(axis='both',
-                which='both',
-                width=2)
-ax = plt.gca()          
-for label in ax.get_xticklabels():
-    label.set_fontsize(12)
-    label.set_fontweight('bold')
+# plt.tick_params(axis='both',
+#                 which='both',
+#                 width=2)
+# ax = plt.gca()          
+# for label in ax.get_xticklabels():
+#     label.set_fontsize(12)
+#     label.set_fontweight('bold')
     
-for label in ax.get_yticklabels():
-    label.set_fontsize(12)
-    label.set_fontweight('bold')
+# for label in ax.get_yticklabels():
+#     label.set_fontsize(12)
+#     label.set_fontweight('bold')
     
-ax.spines['top'].set_linewidth(2)
-ax.spines['bottom'].set_linewidth(2)
-ax.spines['left'].set_linewidth(2)
-ax.spines['right'].set_linewidth(2)
+# ax.spines['top'].set_linewidth(2)
+# ax.spines['bottom'].set_linewidth(2)
+# ax.spines['left'].set_linewidth(2)
+# ax.spines['right'].set_linewidth(2)
 
 # plt.xlabel(r'CO$_{\text{2}}$ uptake', fontsize=12, fontweight='bold')
 # plt.ylabel(r'CH$_{\text{4}}$ uptake', fontsize=12, fontweight='bold')
@@ -94,10 +94,10 @@ ax.spines['right'].set_linewidth(2)
 # plt.grid(True)
 
 
-plt.xlabel('Oil adsorption capacity', fontsize=12, fontweight='bold')
-plt.ylabel('Mechanical Strength', fontsize=12, fontweight='bold')
+plt.xlabel('Oil adsorption capacity', fontsize='large')
+plt.ylabel('Mechanical Strength', fontsize='large')
 
-
+plt.tight_layout()
 
 
 

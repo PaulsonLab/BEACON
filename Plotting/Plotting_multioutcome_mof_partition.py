@@ -23,7 +23,7 @@ Y_original = Y_original[ids_acquired_original]
 outcomes = Y_original.numpy()
 
 # # Plotting
-plt.figure()
+plt.figure(dpi=150)
 plt.scatter(outcomes[:, 0], outcomes[:, 1], alpha=0.5, edgecolors='none', s=4)
 
 cut_x = 1
@@ -59,6 +59,8 @@ for i in range(1, 3):
 plt.xlim(min(outcomes[:, 0]),max(outcomes[:, 0]))
 plt.ylim(min(outcomes[:, 1]),max(outcomes[:, 1]))
 
+plt.xlabel('Oil adsorption capacity', fontsize='large')
+plt.ylabel('Mechanical strength', fontsize='large')
 # # plt.title('Visually Interesting 2D Outcome Space from High-Dimensional Inputs')
 # plt.tick_params(axis='both',
 #                 which='both',

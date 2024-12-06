@@ -123,7 +123,7 @@ def train(num_epochs, cnn, loaders):
     pass
 
 # train(num_epochs, cnn, loaders)
-cnn.load_state_dict(torch.load('/home/tang.1856/BEACON/CNN2.pth',map_location=torch.device('cpu')))
+cnn.load_state_dict(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/CNN2.pth',map_location=torch.device('cpu')))
 
 def test():
     # Test the model

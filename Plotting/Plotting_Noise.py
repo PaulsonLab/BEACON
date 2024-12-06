@@ -9,12 +9,13 @@ import torch
 import matplotlib.pyplot as plt
 
 synthetic = '4DAckley'
+noise = 0.5
 
-cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_cost_list_NS_TS_considernoise_1.pt')
-coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_coverage_list_NS_TS_considernoise_1.pt')
+cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_cost_list_NS_TS_considernoise_'+str(noise)+'.pt')
+coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_coverage_list_NS_TS_considernoise_'+str(noise)+'.pt')
 
-cost_NS_TS2 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_cost_list_NS_TS_noise_1.pt')
-coverage_NS_TS2 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_coverage_list_NS_TS_noise_1.pt')
+cost_NS_TS2 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_cost_list_NS_TS_noise_'+str(noise)+'.pt')
+coverage_NS_TS2 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/4DNoisyAckley_coverage_list_NS_TS_noise_'+str(noise)+'.pt')
 
 
 coverage_NS_mean_TS1 = torch.mean(coverage_NS_TS1, dim = 0)

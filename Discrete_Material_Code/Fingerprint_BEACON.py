@@ -33,7 +33,7 @@ from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley
 import pickle
 from botorch.models.transforms.outcome import Standardize
-from botorch import fit_gpytorch_model
+from botorch import fit_gpytorch_mll
 import matplotlib.pyplot as plt
 import pandas as pd
 import math
@@ -133,7 +133,7 @@ class CustomAcquisitionFunction_TS():
 if __name__ == '__main__':
     
     dim = 2133
-    N_init = 10
+    N_init = 100
     replicate = 20
     n_bins = 25 # number of bins used to calculate the reachability and uniformity 
     k = 10 # number of k-nearest neighbor
@@ -167,12 +167,17 @@ if __name__ == '__main__':
         print('seed:',seed)
         np.random.seed(seed)
         ids_acquired = np.random.choice(np.arange((len(y_original))), size=N_init, replace=False)
+        all_indices = np.arange(len(y_original))
+        remaining_indices = np.setdiff1d(all_indices, ids_acquired) # indices for testing data
         train_x = X_original[ids_acquired]
-        train_y = y_original[ids_acquired] # original scale
+        train_y = y_original[ids_acquired]
+        test_x = X_original[remaining_indices]
+        test_y = y_original[remaining_indices]
+       
         
-        ids_acquired_test = np.random.choice(np.arange((len(y_original))), size=100, replace=False)
-        test_x = X_original[ids_acquired_test]
-        test_y= y_original[ids_acquired_test]
+        # ids_acquired_test = np.random.choice(np.arange((len(y_original))), size=100, replace=False)
+        # test_x = X_original[ids_acquired_test]
+        # test_y= y_original[ids_acquired_test]
         
         coverage, uniformity = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub, n_hist) # Calculate the initial reachability and uniformity
         
@@ -183,7 +188,7 @@ if __name__ == '__main__':
         for i in range(BO_iter):        
             
             mll, model = initialize_model(train_x.to(torch.float64), train_y.to(torch.float64))
-            fit_gpytorch_model(mll)
+            fit_gpytorch_mll(mll)
             
             custom_acq_function = CustomAcquisitionFunction_TS(model, train_y, k=k, TS = TS)
             

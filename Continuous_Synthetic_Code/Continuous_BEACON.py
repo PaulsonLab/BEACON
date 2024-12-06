@@ -23,7 +23,7 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+# import torchsort
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
@@ -63,13 +63,13 @@ class CustomAcquisitionFunction(AnalyticAcquisitionFunction):
         
         # For other data sets we can sample at once
         # batch_shape x N x m
-        # X = X.squeeze(1).unsqueeze(0)
+        X = X.squeeze(1).unsqueeze(0)
         
         # torch.manual_seed(self.n_seed) # make sure different starting point optimize the same posterior sample
-        # posterior = self.model.posterior(X)
+        posterior = self.model.posterior(X)
         # num_samples x batch_shape x N x m
-        # samples = posterior.rsample(sample_shape=torch.Size([1])).squeeze(1) # Thompson Sampling 
-        # dist = torch.cdist(samples[0], self.sampled_behavior).squeeze(0)
+        samples = posterior.rsample(sample_shape=torch.Size([1])).squeeze(1) # Thompson Sampling 
+        dist = torch.cdist(samples[0], self.sampled_behavior).squeeze(0)
         
         samples = self.ts_sampler.query_sample(X) # Thompson sampling
         dist = torch.cdist(samples, self.sampled_behavior) # Calculate Euclidean distance between TS and all sampled point
@@ -87,23 +87,23 @@ if __name__ == '__main__':
     
     lb = -5 # lower bound for feature
     ub = 5 # upper bound for feature
-    dim = 20 # feature dimension
-    N_init = 20 # number of initial training data
-    replicate = 2# number of replicates for experiment
-    BO_iter = 200 # number of evaluations
+    dim = 4 # feature dimension
+    N_init = 10 # number of initial training data
+    replicate = 20# number of replicates for experiment
+    BO_iter = 500 # number of evaluations
     n_bins = 25 # grid number for calculating reachability
     TS = 1 # number of TS (posterior sample)
     k = 10 # k-nearest neighbor
     
     # Specify the minimum/maximum value for each synthetic function as to calculate reachability
     
-    obj_lb = 0 # minimum obj value for Rosenbrock
+    # obj_lb = 0 # minimum obj value for Rosenbrock
     # obj_ub = 270108 # obj maximum for 4D Rosenbrock
     # obj_ub = 630252.63 # obj maximum for 8D Rosenbrock
-    obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
+    # obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
     
-    # obj_lb = 0 # minimum obj value for Ackley
-    # obj_ub = 14.3027 # maximum obj value for Ackley
+    obj_lb = 0 # minimum obj value for Ackley
+    obj_ub = 14.3027 # maximum obj value for Ackley
     
     # obj_lb = -39.16599*dim # minimum obj val for 4D SkyTang
     # obj_ub = 500 # maximum obj val for 4D SkyTang
@@ -112,8 +112,8 @@ if __name__ == '__main__':
    
     # Specify the synthetic function we want to study
     
-    function = Rosenbrock(dim=dim)
-    # function = Ackley(dim=dim)
+    # function = Rosenbrock(dim=dim)
+    function = Ackley(dim=dim)
     # function = StyblinskiTang(dim=dim)
     
     cost_tensor = []
@@ -144,7 +144,7 @@ if __name__ == '__main__':
             start_time =  time.time()
             fit_gpytorch_mll(mll)
             end_time = time.time()
-            print(end_time-start_time)
+            # print(end_time-start_time)
             model.train_x = train_x
             model.train_y = train_y
             
@@ -184,6 +184,6 @@ if __name__ == '__main__':
     time_tensor = torch.tensor(time_tensor, dtype=torch.float32) 
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)   
-    torch.save(coverage_tensor, '4DAckley_coverage_list_NS_TS.pt')
-    torch.save(cost_tensor, '4DAckley_cost_list_NS_TS.pt')  
-    torch.save(time_tensor, '4DAckley_time_list_NS_TS.pt')
+    # torch.save(coverage_tensor, '4DAckley_coverage_list_NS_TS.pt')
+    # torch.save(cost_tensor, '4DAckley_cost_list_NS_TS.pt')  
+    # torch.save(time_tensor, '4DAckley_time_list_NS_TS.pt')

@@ -9,7 +9,7 @@ Created on Fri Apr 12 13:11:40 2024
 import torch
 import matplotlib.pyplot as plt
 
-synthetic = 'DNA'
+synthetic = 'ESOL'
 cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
 coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
 
@@ -19,8 +19,8 @@ coverage_BO = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Mater
 cost_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
 coverage_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_RS.pt')
 
-cost_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_xspace.pt')
-coverage_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_xspace.pt')
+# cost_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_xspace.pt')
+# coverage_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_xspace.pt')
 
 
 
@@ -36,9 +36,9 @@ coverage_RS_mean = torch.mean(coverage_RS, dim = 0)
 coverage_RS_std = torch.std(coverage_RS, dim = 0)
 cost_RS_mean = torch.mean(cost_RS, dim = 0)
 
-coverage_NS_xspace_mean = torch.mean(coverage_NS_xspace, dim = 0)
-coverage_NS_xspace_std = torch.std(coverage_NS_xspace , dim = 0)
-cost_NS_xspace_mean = torch.mean(cost_NS_xspace , dim = 0)
+# coverage_NS_xspace_mean = torch.mean(coverage_NS_xspace, dim = 0)
+# coverage_NS_xspace_std = torch.std(coverage_NS_xspace , dim = 0)
+# cost_NS_xspace_mean = torch.mean(cost_NS_xspace , dim = 0)
 
 
 
@@ -52,13 +52,13 @@ alpha = 0.3
 plt.figure(figsize=(12,10))
 plt.plot(cost_NS_mean_TS1[::marker_interval], coverage_NS_mean_TS1[::marker_interval], label='BEACON', marker='X', markersize=marker_size, linewidth=linewidth)
 plt.plot(cost_BO_mean[::marker_interval], coverage_BO_mean[::marker_interval], label='MaxVar', marker='^', markersize=marker_size, linewidth=linewidth)
-plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size,color='mediumpurple', linewidth=linewidth)
+# plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size,color='mediumpurple', linewidth=linewidth)
 plt.plot(cost_RS_mean[::marker_interval], coverage_RS_mean[::marker_interval], label='RS', marker='v', markersize=marker_size, color='hotpink', linewidth=linewidth)
 
 
 plt.fill_between(cost_NS_mean_TS1, coverage_NS_mean_TS1 - coverage_NS_std_TS1, coverage_NS_mean_TS1 + coverage_NS_std_TS1,  alpha=alpha)
 plt.fill_between(cost_BO_mean, coverage_BO_mean - coverage_BO_std, coverage_BO_mean + coverage_BO_std,  alpha=alpha)
-plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspace_std, coverage_NS_xspace_mean + coverage_NS_xspace_std,  alpha=alpha,color='mediumpurple')
+# plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspace_std, coverage_NS_xspace_mean + coverage_NS_xspace_std,  alpha=alpha,color='mediumpurple')
 plt.fill_between(cost_RS_mean, coverage_RS_mean - coverage_RS_std, coverage_RS_mean + coverage_RS_std,  alpha=alpha, color='hotpink')
 
 plt.xlabel('Number of evaluations', fontsize=text_size, fontweight=weight)
@@ -83,3 +83,26 @@ ax.spines['left'].set_linewidth(2)
 ax.spines['right'].set_linewidth(2)
 
 plt.grid(alpha=0.5, linewidth=2.0)
+
+
+from scipy.io import savemat
+save_path = "/home/tang.1856/BEACON/BEACON/Plotting/SmallMolecule.mat"
+# Create a dictionary to store all data
+data_dict = {}
+synthetic = ['WaterSolubility', 'ESOL', 'logD']
+# Iterate through datasets and save data
+for i in range(len(synthetic)):
+    data_dict[f'cost_NS_TS1_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_TS_1_cost_list_NS.pt')
+    data_dict[f'coverage_NS_TS1_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_TS_1_coverage_list_NS.pt')
+    data_dict[f'cost_BO_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_MaxVar.pt')
+    data_dict[f'coverage_BO_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_MaxVar.pt')
+    data_dict[f'cost_RS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_RS.pt')
+    data_dict[f'coverage_RS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_RS.pt')
+
+data_dict[f'cost_BEACON_SAAS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_SAAS.pt')
+data_dict[f'coverage_BEACON_SAAS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_SAAS.pt')
+
+data_dict[f'cost_MaxVar_SAAS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_MaxVar_SAAS.pt')
+data_dict[f'coverage_MaxVar_SAAS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Discrete_Material_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_MaxVar_SAAS.pt')
+
+savemat(save_path, data_dict)

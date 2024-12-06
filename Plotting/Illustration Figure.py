@@ -24,7 +24,7 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+# import torchsort
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
@@ -86,6 +86,7 @@ class CustomAcquisitionFunction(AnalyticAcquisitionFunction):
         self.sampled_behavior = sampled_behavior
         
         self.ts_sampler = EfficientThompsonSampler(model)
+        
         self.ts_sampler.create_sample()
         
     @t_batch_mode_transform(expected_q=1)

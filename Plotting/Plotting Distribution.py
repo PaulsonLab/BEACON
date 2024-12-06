@@ -138,49 +138,49 @@ inputs = np.random.uniform(-5, 5, (20000,6))  # Uniformly distributed in a range
 # Calculate outcomes
 outcomes = np.array([synthetic_function(x) for x in inputs])
 
-# MOF Multi-outcome
-import torch
-feat = set(
-["func-chi-0-all" ,"D_func-S-3-all", "total_SA_volumetric", 
- "Di", "Dif", "mc_CRY-Z-0-all","total_POV_volumetric","density [g/cm^3]", "total_SA_gravimetric",
- "D_func-S-1-all","Df", "mc_CRY-S-0-all" ,"total_POV_gravimetric","D_func-alpha-1-all","func-S-0-all",
- "D_mc_CRY-chi-3-all","D_mc_CRY-chi-1-all","func-alpha-0-all",
- "D_mc_CRY-T-2-all","mc_CRY-Z-2-all","D_mc_CRY-chi-2-all",
-"total_SA_gravimetric","total_POV_gravimetric","Di","density [g/cm^3]",
- "func-S-0-all",
- "func-chi-2-all","func-alpha-0-all",
- "total_POV_volumetric","D_func-alpha-1-all","total_SA_volumetric",
- "func-alpha-1-all",
- "func-alpha-3-all",
- "Dif",
- "Df",
- "func-chi-3-all", 
-  'Di',
- 'Df',
- 'Dif',
- 'density [g/cm^3]',
- 'total_SA_volumetric',
- 'total_SA_gravimetric',
- 'total_POV_volumetric',
- 'total_POV_gravimetric'
-])
+# # MOF Multi-outcome
+# import torch
+# feat = set(
+# ["func-chi-0-all" ,"D_func-S-3-all", "total_SA_volumetric", 
+#  "Di", "Dif", "mc_CRY-Z-0-all","total_POV_volumetric","density [g/cm^3]", "total_SA_gravimetric",
+#  "D_func-S-1-all","Df", "mc_CRY-S-0-all" ,"total_POV_gravimetric","D_func-alpha-1-all","func-S-0-all",
+#  "D_mc_CRY-chi-3-all","D_mc_CRY-chi-1-all","func-alpha-0-all",
+#  "D_mc_CRY-T-2-all","mc_CRY-Z-2-all","D_mc_CRY-chi-2-all",
+# "total_SA_gravimetric","total_POV_gravimetric","Di","density [g/cm^3]",
+#  "func-S-0-all",
+#  "func-chi-2-all","func-alpha-0-all",
+#  "total_POV_volumetric","D_func-alpha-1-all","total_SA_volumetric",
+#  "func-alpha-1-all",
+#  "func-alpha-3-all",
+#  "Dif",
+#  "Df",
+#  "func-chi-3-all", 
+#   'Di',
+#  'Df',
+#  'Dif',
+#  'density [g/cm^3]',
+#  'total_SA_volumetric',
+#  'total_SA_gravimetric',
+#  'total_POV_volumetric',
+#  'total_POV_gravimetric'
+# ])
 
-file_path1 = '/home/tang.1856/Downloads/PMOF20K_traindata_7000_train.csv'
-data1 = pd.read_csv(file_path1)
-y1 = data1['pure_uptake_CO2_298.00_15000']
-y2 = data1['pure_uptake_methane_298.00_580000']
-
-Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
-# outcomes = Y_original.numpy()
-
-
-# file_path1 = '/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv'
+# file_path1 = '/home/tang.1856/Downloads/PMOF20K_traindata_7000_train.csv'
 # data1 = pd.read_csv(file_path1)
-# y1 = data1['D_N2 (cm2/s)']
-# y2 = data1['U_N2 (mol/kg)']
+# y1 = data1['pure_uptake_CO2_298.00_15000']
+# y2 = data1['pure_uptake_methane_298.00_580000']
 
-Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
-outcomes = Y_original.numpy()
+# Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
+# # outcomes = Y_original.numpy()
+
+
+# # file_path1 = '/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv'
+# # data1 = pd.read_csv(file_path1)
+# # y1 = data1['D_N2 (cm2/s)']
+# # y2 = data1['U_N2 (mol/kg)']
+
+# Y_original = torch.stack((torch.tensor(y1.values),torch.tensor(y2.values)),dim=1)
+# outcomes = Y_original.numpy()
 
 # # Plotting
 plt.figure()

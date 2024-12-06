@@ -10,7 +10,7 @@ import torch
 from botorch.models import FixedNoiseGP, SingleTaskGP
 from gpytorch.kernels import ScaleKernel
 from gpytorch.mlls import ExactMarginalLogLikelihood
-from botorch import fit_gpytorch_model
+from botorch import fit_gpytorch_mll
 from scipy.stats import norm
 from botorch.acquisition.analytic import ExpectedImprovement
 import matplotlib.pyplot as plt
@@ -55,7 +55,7 @@ def bo_run(X, y, r, BO_iterations, nb_COFs_initialization, which_acquisition):
         # construct and fit GP model
         model = SingleTaskGP(X[ids_acquired, :], y_acquired, outcome_transform=Standardize(m=1))
         mll = ExactMarginalLogLikelihood(model.likelihood, model)
-        fit_gpytorch_model(mll)
+        fit_gpytorch_mll(mll)
       
         if which_acquisition == "max sigma":
             with torch.no_grad():
@@ -87,10 +87,10 @@ def bo_run(X, y, r, BO_iterations, nb_COFs_initialization, which_acquisition):
 
 if __name__ == '__main__':
     
-    dim = 20
+    dim = 14
     n_bins = 25
     N_init = 10 
-    BO_iterations = 500 
+    BO_iterations = 100 
     nb_runs = 20 
     
     # Case study 1
@@ -104,14 +104,14 @@ if __name__ == '__main__':
     
     # Case Study 3
     # load solubility data from csv file 
-    # df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/water_set_wide_descriptors.csv') # data from Qiao et al.
-    # X = (df.iloc[:, 4:(4+dim)]).values
-    # y = df.iloc[:, 3].values
+    df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/water_set_wide_descriptors.csv') # data from Qiao et al.
+    X = (df.iloc[:, 4:(4+dim)]).values
+    y = df.iloc[:, 3].values
     
     # Case Study 4
-    df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv') # data from Boobier et al.
-    X = (df.iloc[:, 1:(1+dim)]).values
-    y = df['U_N2 (mol/kg)'].values
+    # df = pd.read_csv('/home/tang.1856/Jonathan/Novelty Search/Training Data/rawdata/Nitrogen.csv') # data from Boobier et al.
+    # X = (df.iloc[:, 1:(1+dim)]).values
+    # y = df['U_N2 (mol/kg)'].values
     
     y = np.reshape(y, (np.size(y), 1)) # for the GP       
     X = torch.from_numpy(X)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     coverage_tensor = []
     cost_tensor = []
 
-    which_acquisition = "RS" # specify acquisition function
+    which_acquisition = "EI" # specify acquisition function
     nb_COFs_initializations = {"RS": [N_init],
                                "max sigma": [N_init],
                                "EI": [N_init]}
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     # save the corresponding results   
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
-    torch.save(coverage_tensor, 'N2uptake_coverage_list_RS.pt')
-    torch.save(cost_tensor, 'N2uptake_cost_list_RS.pt')  
+    torch.save(coverage_tensor, 'N2uptake_coverage_list_EI.pt')
+    torch.save(cost_tensor, 'N2uptake_cost_list_EI.pt')  
    
   

@@ -22,9 +22,8 @@ coverage_MaxVar_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_
 cost_RS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_cost_list_RS_120.pt')[indice]
 coverage_RS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_coverage_list_RS_120.pt')[indice]
 
-cost_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_cost_list_NS_xspace_120.pt')[indice]
-coverage_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_coverage_list_NS_xspace_120.pt')[indice]
-
+# cost_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_cost_list_NS_xspace_120.pt')[indice]
+# coverage_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_coverage_list_NS_xspace_120.pt')[indice]
 
 
 coverage_NS_mean_TS1 = torch.mean(coverage_BEACON, dim = 0)
@@ -46,9 +45,9 @@ coverage_RS_std = torch.std(coverage_RS_constraint, dim = 0)
 cost_RS_mean = torch.mean(cost_RS_constraint, dim = 0)
 
 
-coverage_NS_xspace_mean = torch.mean(coverage_NSFS_constraint, dim = 0)
-coverage_NS_xspace_std = torch.std(coverage_NSFS_constraint , dim = 0)
-cost_NS_xspace_mean = torch.mean(cost_NSFS_constraint , dim = 0)
+# coverage_NS_xspace_mean = torch.mean(coverage_NSFS_constraint, dim = 0)
+# coverage_NS_xspace_std = torch.std(coverage_NSFS_constraint , dim = 0)
+# cost_NS_xspace_mean = torch.mean(cost_NSFS_constraint , dim = 0)
 
 text_size = 24
 marker_size = 18
@@ -59,13 +58,13 @@ marker_interval = 8
 plt.figure(figsize=(12,10))
 plt.plot(cost_NS_mean_TS1[::marker_interval], coverage_NS_mean_TS1[::marker_interval], label='BEACON', marker='X', markersize=marker_size,linewidth=linewidth)
 plt.plot(cost_BO_mean[::marker_interval], coverage_BO_mean[::marker_interval], label='BEACON-bc', marker='^', markersize=marker_size,linewidth=linewidth)
-plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size,color='mediumpurple',linewidth=linewidth)
+# plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size,color='mediumpurple',linewidth=linewidth)
 plt.plot(cost_RS_mean[::marker_interval], coverage_RS_mean[::marker_interval], label='RS', marker='v', markersize=marker_size,color='hotpink',linewidth=linewidth)
 plt.plot(cost_MaxVar_mean[::marker_interval], coverage_MaxVar_mean[::marker_interval], label='MaxVar', marker='s', markersize=marker_size,color='green',linewidth=linewidth)
 
 plt.fill_between(cost_NS_mean_TS1, coverage_NS_mean_TS1 - coverage_NS_std_TS1, coverage_NS_mean_TS1 + coverage_NS_std_TS1,  alpha=0.3)
 plt.fill_between(cost_BO_mean, coverage_BO_mean - coverage_BO_std, coverage_BO_mean + coverage_BO_std,  alpha=0.3)
-plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspace_std, coverage_NS_xspace_mean + coverage_NS_xspace_std,  alpha=0.3,color='mediumpurple')
+# plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspace_std, coverage_NS_xspace_mean + coverage_NS_xspace_std,  alpha=0.3,color='mediumpurple')
 plt.fill_between(cost_RS_mean, coverage_RS_mean - coverage_RS_std, coverage_RS_mean + coverage_RS_std,  alpha=0.3,color='hotpink')
 plt.fill_between(cost_MaxVar_mean, coverage_MaxVar_mean - coverage_MaxVar_std, coverage_MaxVar_mean + coverage_MaxVar_std,  alpha=0.3,color='green')
 
@@ -73,7 +72,7 @@ plt.fill_between(cost_MaxVar_mean, coverage_MaxVar_mean - coverage_MaxVar_std, c
 plt.xlabel('Number of evaluations', fontsize=text_size, fontweight=weight)
 plt.ylabel('Reachability', fontsize=text_size, fontweight=weight)
 plt.legend(prop={'weight':'bold','size':text_size}, loc=4)
-plt.title('7D Electrospun Oil Sorbent', fontsize=text_size, fontweight=weight)
+# plt.title('7D Electrospun Oil Sorbent', fontsize=text_size, fontweight=weight)
 
 plt.tick_params(axis='both',
                 which='both',

@@ -24,7 +24,7 @@ from botorch.models.transforms.outcome import Standardize
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
 import gpytorch
 import time
-from botorch.acquisition import ExpectedImprovement
+from botorch.acquisition import ExpectedImprovement, LogExpectedImprovement
 from botorch.optim import optimize_acqf
 
 def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5):
@@ -43,35 +43,35 @@ def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5):
 
 if __name__ == '__main__':    
     
-    dim = 8
-    N_init = 20
+    dim = 12
+    N_init = 10
     BO_iter = 200
     lb = -5
     ub = 5
     n_bins = 25
-    replicate = 5
+    replicate = 20
    
     # Specify the minimum/maximum value for each synthetic function as to calculate reachability
     
-    # obj_lb = 0 # minimum obj value for Rosenbrock
-    # obj_ub = 270108 # obj maximum for 4D Rosenbrock
-    # obj_ub = 630252.63 # obj maximum for 8D Rosenbrock
-    # obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
+    # obj_ub = 0 # minimum obj value for Rosenbrock
+    # obj_lb = -270108 # obj maximum for 4D Rosenbrock
+    # obj_lb = -630252.63 # obj maximum for 8D Rosenbrock
+    # obj_lb = -990396.990397 # obj maximum for 12D Rosenbrock
     # obj_ub = 1710685.71
     
-    obj_lb = 0 # minimum obj value for Ackley
-    obj_ub = -14.3027 # maximum obj value for Ackley
+    # obj_ub = 0 # minimum obj value for Ackley
+    # obj_lb = -14.3027 # maximum obj value for Ackley
     
-    # obj_lb = -39.16599*dim # minimum obj val for 4D SkyTang
-    # obj_ub = 500 # maximum obj val for 4D SkyTang
-    # obj_ub = 1000 # maximum obj val for 8D SkyTang
-    # obj_ub = 1500 # maximum obj for 12D SkyTang
+    obj_ub = 39.16599*dim # minimum obj val for 4D SkyTang
+    # obj_lb = -500 # maximum obj val for 4D SkyTang
+    # obj_lb = -1000 # maximum obj val for 8D SkyTang
+    obj_lb = -1500 # maximum obj for 12D SkyTang
    
     # Specify the synthetic function we want to study
     
-    # fun = Rosenbrock(dim=dim)
-    fun = Ackley(dim=dim, negate=True)
-    # fun = StyblinskiTang(dim=dim)
+    # fun = Rosenbrock(dim=dim, negate=True)
+    # fun = Ackley(dim=dim, negate=True)
+    fun = StyblinskiTang(dim=dim, negate=True)
     
     
     RandomSearch =False# Random search or MaxVar
@@ -88,9 +88,10 @@ if __name__ == '__main__':
         train_Y = fun(lb + (ub-lb)*train_X).unsqueeze(1)
         
         cost_list[seed].append(0)
-        # coverage, uniformity = reachability_uniformity(train_Y, n_bins, obj_lb, obj_ub)
-        variance = float(train_Y.var())
-        coverage_list[seed].append(variance)
+        coverage, uniformity = reachability_uniformity(train_Y, n_bins, obj_lb, obj_ub)
+        # variance = float(train_Y.var())
+        # coverage_list[seed].append(variance)
+        coverage_list[seed].append(coverage)
         
         for bo_iter in range(BO_iter):
             covar_module = gpytorch.kernels.ScaleKernel(gpytorch.kernels.RBFKernel(ard_num_dims=dim)) # Choose the RBF kernel
@@ -114,9 +115,10 @@ if __name__ == '__main__':
             Y_next = fun(lb+(ub-lb)*candidate).unsqueeze(1)
             train_Y = torch.cat((train_Y, Y_next))
             
-            # coverage, uniformity = reachability_uniformity(train_Y, n_bins, obj_lb, obj_ub)
-            variance = float(train_Y.var())
-            coverage_list[seed].append(variance)
+            coverage, uniformity = reachability_uniformity(train_Y, n_bins, obj_lb, obj_ub)
+            # variance = float(train_Y.var())
+            # coverage_list[seed].append(variance)
+            coverage_list[seed].append(coverage)
             cost_list[seed].append(cost_list[seed][-1]+1)
             
         end_time = time.time()
@@ -125,6 +127,6 @@ if __name__ == '__main__':
     time_tensor = torch.tensor(time_tensor, dtype=torch.float32) 
     cost_tensor = torch.tensor(cost_list, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_list, dtype=torch.float32) 
-    torch.save(coverage_tensor, '8DAckley_variance_list_EI.pt')
-    torch.save(cost_tensor, '8DAckley_cost_list_EI.pt')  
+    torch.save(coverage_tensor, '12DStyTang_coverage_list_logEI.pt')
+    torch.save(cost_tensor, '12DStyTang_cost_list_logEI.pt')  
     # torch.save(time_tensor, '20DRosen_time_list_RS.pt')
