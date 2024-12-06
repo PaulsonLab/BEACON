@@ -9,6 +9,8 @@ BEACON
 ------------------------------
 Run the following commands to execute BEACON under different problem setting:
 
+1. Continuous feature space (e.g. synthetic problem conducted in this paper)
+   
 For continuous feature space and single outcome problem:
 ```sh
 python Continuous_SingleOutcome_BEACON.py.py
@@ -17,4 +19,16 @@ python Continuous_SingleOutcome_BEACON.py.py
 For continuous feature space and multi outcome problem:
 ```sh
 python Continuous_Multioutcome_BEACON.py.py
+```
+
+2. Discrete feature space (e.g. Material and drug case study conducted in this paper)
+   
+For discrete feature space and single outcome problem:
+```sh
+python Discrete_SingleOtcome_BEACON.py.py
+```
+
+For discrete feature space and multi outcome problem:
+```sh
+python Discrete_MultiOutcome_BEACON.py.py
 ```
