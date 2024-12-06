@@ -13,3 +13,8 @@ For continuous feature space and single outcome problem:
 ```sh
 python Continuous_SingleOutcome_BEACON.py.py
 ```
+
+For continuous feature space and multi outcome problem:
+```sh
+python Continuous_Multioutcome_BEACON.py.py
+```
