@@ -23,7 +23,7 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+# import torchsort
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt

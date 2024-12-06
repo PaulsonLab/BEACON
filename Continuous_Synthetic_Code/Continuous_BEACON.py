@@ -63,13 +63,13 @@ class CustomAcquisitionFunction(AnalyticAcquisitionFunction):
         
         # For other data sets we can sample at once
         # batch_shape x N x m
-        X = X.squeeze(1).unsqueeze(0)
+        # X = X.squeeze(1).unsqueeze(0)
         
         # torch.manual_seed(self.n_seed) # make sure different starting point optimize the same posterior sample
-        posterior = self.model.posterior(X)
+        # posterior = self.model.posterior(X)
         # num_samples x batch_shape x N x m
-        samples = posterior.rsample(sample_shape=torch.Size([1])).squeeze(1) # Thompson Sampling 
-        dist = torch.cdist(samples[0], self.sampled_behavior).squeeze(0)
+        # samples = posterior.rsample(sample_shape=torch.Size([1])).squeeze(1) # Thompson Sampling 
+        # dist = torch.cdist(samples[0], self.sampled_behavior).squeeze(0)
         
         samples = self.ts_sampler.query_sample(X) # Thompson sampling
         dist = torch.cdist(samples, self.sampled_behavior) # Calculate Euclidean distance between TS and all sampled point

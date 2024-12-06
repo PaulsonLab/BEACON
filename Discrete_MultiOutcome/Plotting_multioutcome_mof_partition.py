@@ -18,10 +18,10 @@ np.random.seed(0)
 # # X_original = X_original[ids_acquired_original]
 # Y_original = Y_original[ids_acquired_original]
 # outcomes = Y_original.numpy()
-
+     
 fun = OilSorbent(7)
-lb = torch.tensor([3/7, 0.7, 12, 0.12, 0, 16, 0.41])
-ub = torch.tensor([7/3, 2, 24, 0.18, 0.2, 28, 1.32])
+lb = torch.tensor([3/7, 0.7, 12, 0.12, 0, 16, 0.41])  
+ub = torch.tensor([7/3, 2, 24, 0.18, 0.2, 28, 1.32])  
 rand_samp = lhs(7, 5000, random_state=0) # using latin hypercube
 X_original = torch.tensor(rand_samp, dtype=torch.double)
 Y_original = fun(lb+(ub-lb)*X_original)
