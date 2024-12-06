@@ -3,7 +3,7 @@ This repo contains the codes for [BEACON: A Bayesian Optimization Inspired
 Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616)
 
 # Usage
-We provide the code scripts for executing BEACON on different problem setting.
+We provide the code scripts for executing BEACON on different problem setting. Noted that all code script requires the usage of ThompsonSampling.py file.
 
 BEACON
 ------------------------------
