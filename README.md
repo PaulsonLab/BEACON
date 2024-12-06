@@ -2,6 +2,11 @@
 This repo contains the codes for [BEACON: A Bayesian Optimization Inspired
 Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616)
 
+# Installation
+```sh
+pip install -r requirements.txt
+```
+
 # Usage
 We provide the code scripts for executing BEACON on different problem setting. Noted that all code script requires the usage of [ThompsonSampling.py](https://github.com/PaulsonLab/BEACON/blob/1ede361eb98824b459da9df3a17839ab8753d02b/ThompsonSampling.py) file.
 
