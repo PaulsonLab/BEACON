@@ -1,2 +1,3 @@
 # BEACON
-This repo contains the code for (https://arxiv.org/abs/2406.03616)
+This repo contains the codes for [BEACON: A Bayesian Optimization Inspired
+Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616)
