@@ -2,7 +2,7 @@
 This repo contains the codes for [BEACON: A Bayesian Optimization Inspired
 Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616)
 
-<img src='Figures/illustrative.png' width='800'>
+<img src='Figures/illustrative (1).png' width='800'>
 
 # Installation
 ```sh
