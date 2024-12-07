@@ -2,6 +2,8 @@
 This repo contains the codes for [BEACON: A Bayesian Optimization Inspired
 Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616)
 
+<img src='Figures/illustrative.png' width='400'>
+
 # Installation
 ```sh
 pip install -r requirements.txt
