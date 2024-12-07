@@ -37,3 +37,7 @@ For discrete feature space and multi outcome problem:
 ```sh
 python Discrete_MultiOutcome_BEACON.py
 ```
+
+# Extension to high-dimensional problem
+We propose an extension algorithm TR-BEACON for addressing high-dimensional novelty search problem.
+Please refer to the [paper](https://openreview.net/pdf?id=9Xo6ONB8E3) and [github repo](https://github.com/PaulsonLab/TR-BEACON).
