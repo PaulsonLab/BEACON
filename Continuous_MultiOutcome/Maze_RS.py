@@ -27,6 +27,8 @@ from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from gpytorch.kernels import MaternKernel, RBFKernel, ScaleKernel
 import matplotlib.pyplot as plt
 import gymnasium as gym
+import gymnasium_robotics
+gym.register_envs(gymnasium_robotics)
 
     
 def reachability_uniformity(behavior, n_bins = 25, obj_lb1 = -5, obj_ub1 = 5, obj_lb2 = -5, obj_ub2 = 5):

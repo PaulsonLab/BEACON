@@ -30,6 +30,8 @@ from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from src.ThompsonSampling import EfficientThompsonSampler
 from sklearn.cluster import KMeans
 import gymnasium as gym
+import gymnasium_robotics
+gym.register_envs(gymnasium_robotics)
 
 def policy(param, state):
     
@@ -102,9 +104,9 @@ class CustomAcquisitionFunction(AcquisitionFunction):
 if __name__ == '__main__':
        
     dim = 8
-    N_init = 50
+    N_init = 10
     replicate = 1
-    BO_iter = 200
+    BO_iter = 300
     k_NN = 10
     
     lb = -1

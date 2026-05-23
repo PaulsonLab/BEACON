@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # X_original = pickle.load(open('/fs/ess/PAS2983/jontwt/BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['x'] # data from Ghude and Chowdhury 2023 (7 features for MOFs)
     # y_original = pickle.load(open('/fs/ess/PAS2983/jontwt/BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['y'] # data from Ghude and Chowdhury 2023 (H2 adsorp capacity)
     
-    # Case Study 2
+    # Case Study 2: Nitrogen uptake
     df = pd.read_csv('/fs/ess/PAS2983/jontwt/BEACON/Material Data/Nitrogen.csv') # data from Daglar et al.
     dim = 20
     X_original = (df.iloc[:, 1:(1+dim)]).values

@@ -31,6 +31,8 @@ from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 import gymnasium as gym
+import gymnasium_robotics
+gym.register_envs(gymnasium_robotics)
 
 def policy(param, state):
    
@@ -117,11 +119,6 @@ if __name__ == '__main__':
     TS = 1 # number of TS (posterior sample)
     k = 10 # k-nearest neighbor
     n_bins = 10
-    obj_lb1 = -5.1
-    obj_ub1 = 5.1
-    obj_lb2 = -5.1
-    obj_ub2 = 5.1
-   
     
     cost_tensor = []
     coverage_tensor = []
@@ -209,7 +206,6 @@ if __name__ == '__main__':
     
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     cumbent_tensor = torch.tensor(cumbent_tensor, dtype=torch.float32) 
-    # uniformity_tensor = torch.tensor(uniformity_tensor, dtype=torch.float32)  
+
     torch.save(cumbent_tensor, 'Maze_cumbent_list_NS_x_space.pt')
-    # torch.save(uniformity_tensor, '12DStyTang_uniformity_list_NS_x_space.pt')
     torch.save(cost_tensor, 'Maze_cost_list_NS_x_space.pt')  

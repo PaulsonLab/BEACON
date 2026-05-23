@@ -9,18 +9,15 @@ from scipy.spatial.distance import cdist, jensenshannon
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
 import torch
 import sys
-# sys.path.append('/home/tang.1856/Jonathan/Hands-on-Neuroevolution-with-Python-master/Chapter6')
-# from maze_NS import Maze
 from torch.quasirandom import SobolEngine
-
-
+from scipy.spatial import ConvexHull
 
 class Experiment:
     """
     Novelty search in a simple simulated setting where a 2D genome is mapped to a 1D behavior space via a simple  non-linear mapping.
     """
 
-    def __init__(self, params, display=False, seed = None, dim = 2, obj_lb = -5, obj_ub = 5, lb = -5, ub = 5):
+    def __init__(self, params, display=False, seed = None, dim = 2, obj_lb1 = -5, obj_ub1 = 5, obj_lb2 = -5, obj_ub2 = 5, lb = -5, ub = 5):
         """Constructor
 
         Args:
@@ -45,7 +42,7 @@ class Experiment:
         """
         assert params["mapping"] in ['linear', 'hyperbolic', 'bounded_linear', 'linear_seesaw', 'multiplicative',
                                      'soft_multiplicative', 'hyperbolic_seesaw', 'multiplicative_seesaw', 'cosinus',
-                                     '2D_cosinus', 'multiplicative_cosinus', 'peaks', '2D_peaks', 'Rosen', 'Ackley', 'Hartmann', 'StyTang','medium maze'], "incorrect type of mapping"
+                                     '2D_cosinus', 'multiplicative_cosinus', 'peaks', '2D_peaks', 'Rosen', 'Ackley', 'Hartmann', 'StyTang','medium maze','Cluster'], "incorrect type of mapping"
         assert params["eta"] > 0, "eta must be greater than 0"
         assert params["n_pop"] > 0, "n_pop must be greater than 0"
         assert params["n_offspring"] > 0, "n_offspring must be greater than 0"
@@ -65,14 +62,15 @@ class Experiment:
         self.I_SELECTED_ARC = 3  # flag indicating if the individuals is selected to be part of the archive
         self.I_AGE = 4  # age of the individuals = number of generations since its creation
         self.I_GENOME = [5+k for k in range(dim)]  # 2D genome
-        self.I_BEHAVIOR = 5+dim  # 1D behavior
-        self.I_DISTANCE = 5+dim+1  # distance to the parent when the individual is created
-        self.I_NOVELTY = 5+dim+2  # novelty of the individual
-        self.I_COVERAGE = 5+dim+3  # coverage associated with the genome
-        self.I_UNIFORMITY = 5+dim+4  # uniformity associated with the genome
-        self.I_CUM_COVERAGE = 5+dim+5  # cumulative coverage associated with the current group of individuals
-        self.I_CUM_UNIFORMITY = 5+dim+6  # cumulative uniformity associated with the current group of individuals
-        self.SIZE_INDIVIDUAL = 5+dim+7  # length of the descriptor for each individual
+        self.I_BEHAVIOR1 = 5+dim  # 1D behavior
+        self.I_BEHAVIOR2 = 5+dim+1
+        self.I_DISTANCE = 5+dim+2  # distance to the parent when the individual is created
+        self.I_NOVELTY = 5+dim+3  # novelty of the individual
+        self.I_COVERAGE = 5+dim+4  # coverage associated with the genome
+        self.I_UNIFORMITY = 5+dim+5  # uniformity associated with the genome
+        self.I_CUM_COVERAGE = 5+dim+6  # cumulative coverage associated with the current group of individuals
+        self.I_CUM_UNIFORMITY = 5+dim+7  # cumulative uniformity associated with the current group of individuals
+        self.SIZE_INDIVIDUAL = 5+dim+8  # length of the descriptor for each individual
         
         # experiment parameters
         self.seed = seed
@@ -102,8 +100,10 @@ class Experiment:
         self.ub = ub
         self.n_bins = params["n_bins"]
         
-        self.obj_lb = obj_lb
-        self.obj_ub = obj_ub
+        self.obj_lb1 = obj_lb1
+        self.obj_ub1 = obj_ub1
+        self.obj_lb2 = obj_lb2
+        self.obj_ub2 = obj_ub2
         # iterator
         self.t = 0
 
@@ -120,20 +120,12 @@ class Experiment:
         assert all(np.abs(g.flatten()) <= 5.), "the gene values should be in [-5., 5.]"
 
         
+        if self.mapping == 'Cluster':
+            g = self.lb+(self.ub-self.lb)*g
+            y1 = np.sin(g[:,0]) * np.cos(g[:,1]) + g[:,2] * np.exp(-g[:,0]**2) * np.cos(g[:,0] + g[:,1]) + 0.01*np.sin((g[:,3] + g[:,4] + g[:,5]))
+            y2 = np.sin(g[:,3]) * np.cos(g[:,4]) + g[:,5] * np.exp(-g[:,3]**2) * np.sin(g[:,3] + g[:,4])+ 0.01*np.cos((g[:,0] + g[:,1] + g[:,2]))
+            behavior = np.column_stack((y1,y2))
             
-        if self.mapping=='Rosen':
-            func = Rosenbrock(dim=self.dim)
-            behavior = func(self.lb+(self.ub-self.lb)*torch.tensor(g)).numpy()
-            
-        elif self.mapping == "Ackley":
-            func = Ackley(dim = self.dim)
-            behavior = func(self.lb+(self.ub-self.lb)*torch.tensor(g)).numpy()
-        
-      
-        elif self.mapping == 'StyTang':
-            func = StyblinskiTang(dim=self.dim)
-            behavior = func(self.lb+(self.ub-self.lb)*torch.tensor(g)).numpy()
-        
         else:
             behavior = 0 * g[:, 0]
         return behavior
@@ -174,7 +166,22 @@ class Experiment:
         new_genomes = np.minimum(np.maximum(new_genomes, low * np.ones_like(new_genomes)), high * np.ones_like(new_genomes))
 
         return new_genomes
-
+    
+    def distance_point_to_segment(self,p, a, b):
+        # Convert points to numpy arrays
+        p, a, b = np.array(p), np.array(a), np.array(b)
+        # Compute the projection of point p onto the line ab
+        ap = p - a
+        ab = b - a
+        result = a + np.dot(ap, ab) / np.dot(ab, ab) * ab
+        # Check if the projection is on the line segment
+        if np.dot(result - a, result - b) > 0:
+            # The projection is not on the segment, return the minimum distance to endpoints
+            return min(np.linalg.norm(p - a), np.linalg.norm(p - b))
+        else:
+            # Return the perpendicular distance to the segment
+            return np.linalg.norm(np.cross(ab, ap)) / np.linalg.norm(ab)
+    
     def compute_novelty(self, new_b, old_b=None):
         """Compute the novelty of new behaviors, compared to a pool of new + old behaviors.
 
@@ -198,18 +205,29 @@ class Experiment:
         if self.criterion == "novelty":
             if old_b is None:
                 old_b = self.get_reference_behaviors() # get the behavior of archive, population, and offspring at step t
-            distances = cdist(new_b.reshape(-1, 1), old_b.reshape(-1, 1))
+            distances = cdist(new_b, old_b)
             distances = np.sort(distances, axis=1)
             novelties = np.mean(distances[:, :self.n_neighbors], axis=1)  # Note: one distance might be 0 (distance to self)
 
         elif self.criterion == "hull":
             if old_b is None:
                 old_b = self.get_reference_behaviors()
-            hull_min = np.min(old_b)
-            hull_max = np.max(old_b)
-            smallest_distances = np.maximum(hull_min - new_b, new_b - hull_max)
-            novelties = np.maximum(smallest_distances, np.zeros_like(smallest_distances))
-
+            hull = ConvexHull(old_b)  
+            
+            distances = []
+            for q in range(len(new_b)):
+                min_dist = float('inf')
+                for simplex in hull.simplices:
+                    
+                    # new_points = np.append(old_b, new_b[0])
+                    # new_hull = ConvexHull(new_points)
+                    # if list(new_hull.vertices) == list(hull.vertices): # inside the convex hull
+                    dist = self.distance_point_to_segment(new_b[q], old_b[simplex[0]], old_b[simplex[1]])
+                    min_dist = min(min_dist, dist)
+                distances.append(min_dist)
+            
+            novelties = np.array(distances)
+            
         elif self.criterion == "fitness":
             novelties = -np.abs(new_b - self.best_fit)  # distance to the best fit
 
@@ -221,8 +239,7 @@ class Experiment:
 
         return novelties
 
-  
-
+   
     def initialize_population(self):
         """Generates an initial population of individuals at generation self.t.
 
@@ -241,13 +258,9 @@ class Experiment:
         # self.population[self.t, :, :][:, self.I_GENOME] = np.array(sobol.draw(n=self.n_pop).to(torch.float64))
         
         # self.population[self.t, :, :][:, self.I_GENOME] = self.lb + (self.ub-self.lb)*np.random.rand(self.n_pop, self.dim)
-        self.population[self.t, :, self.I_BEHAVIOR] = self.gene_to_behavior(self.population[self.t, :, :][:, self.I_GENOME])
-        self.population[self.t, :, self.I_DISTANCE] = np.zeros(self.n_pop, dtype=np.float32)
-        self.population[self.t, :, self.I_NOVELTY] = self.compute_novelty(self.population[self.t, :, self.I_BEHAVIOR],
-                                                                     old_b=self.population[self.t, :, self.I_BEHAVIOR])  # compare only to itself
-        # self.population[self.t, :, self.I_COVERAGE], self.population[self.t, :, self.I_UNIFORMITY],\
-        #     self.population[self.t, :, self.I_CUM_COVERAGE], self.population[self.t, :, self.I_CUM_UNIFORMITY] = \
-        #     self.evaluate_coverage_and_uniformity(self.population[self.t, :, :][:, self.I_GENOME])
+        self.population[self.t, :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1] = self.gene_to_behavior(self.population[self.t, :, :][:, self.I_GENOME])
+        
+        
 
     def initialize_archive(self):
         """Add most novel individuals for the generation self.t to the archive.
@@ -268,11 +281,11 @@ class Experiment:
         self.offsprings[self.t, :, self.I_AGE] = np.zeros(self.n_offspring, dtype=np.float32)
         self.offsprings[self.t, :, :][:, self.I_GENOME] = \
             self.mutate_genome(self.population[self.t, self.offsprings[self.t, :, self.I_PARENT].astype(int), :][:, self.I_GENOME], low=0, high=1)
-        self.offsprings[self.t, :, self.I_BEHAVIOR] = self.gene_to_behavior(self.offsprings[self.t, :, :][:, self.I_GENOME])
-        self.offsprings[self.t, :, self.I_DISTANCE] = np.abs(self.offsprings[self.t, :, self.I_BEHAVIOR]
-                                                        - self.population[self.t, self.offsprings[self.t, :, self.I_PARENT].astype(int), self.I_BEHAVIOR])
+        self.offsprings[self.t, :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1] = self.gene_to_behavior(self.offsprings[self.t, :, :][:, self.I_GENOME])
+        # self.offsprings[self.t, :, self.I_DISTANCE] = np.abs(self.offsprings[self.t, :, self.I_BEHAVIOR1:self.I_BEHAVIOR2]
+        #                                                 - self.population[self.t, self.offsprings[self.t, :, self.I_PARENT].astype(int), self.I_BEHAVIOR])
         old_behaviors = self.get_reference_behaviors()
-        self.offsprings[self.t, :, self.I_NOVELTY] = self.compute_novelty(self.offsprings[self.t, :, self.I_BEHAVIOR], old_behaviors)
+        self.offsprings[self.t, :, self.I_NOVELTY] = self.compute_novelty(self.offsprings[self.t, :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1], old_behaviors)
         # self.offsprings[self.t, :, self.I_COVERAGE], self.offsprings[self.t, :, self.I_UNIFORMITY],\
         #     self.offsprings[self.t, :, self.I_CUM_COVERAGE], self.offsprings[self.t, :, self.I_CUM_UNIFORMITY] = \
         #     self.evaluate_coverage_and_uniformity(self.offsprings[self.t, :, :][:, self.I_GENOME])
@@ -310,9 +323,9 @@ class Experiment:
             (np.array((N,d), float)): set of behaviors
 
         """
-        return np.hstack((self.population[min(self.t, self.frozen), :, self.I_BEHAVIOR],
-                          self.offsprings[min(self.t, self.frozen), :, self.I_BEHAVIOR],
-                          self.archive[:(min(self.t, self.frozen) + 1), :, self.I_BEHAVIOR].reshape(-1)))
+        return np.vstack((self.population[min(self.t, self.frozen), :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1],
+                          self.offsprings[min(self.t, self.frozen), :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1],
+                          self.archive[:(min(self.t, self.frozen) + 1), :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1][0]))
 
     def create_next_generation(self):
         extended_population = np.vstack((self.population[self.t, :, :], self.offsprings[self.t, :, :]))
@@ -342,18 +355,16 @@ class Experiment:
 
         """
         num = g.shape[0]
-        all_behavior_samples = g[:, self.I_BEHAVIOR]
-
-        # cumulative over all genomes
-        cum_hist, _ = np.histogram(all_behavior_samples, np.linspace(self.obj_lb, self.obj_ub, self.n_bins + 1))
-        cum_hist = cum_hist[np.nonzero(cum_hist)] / (num) # discrete distribution
-        cum_hist_uni = np.mean(cum_hist) * np.ones_like(cum_hist) # theoretical uniform distribution
-
-        cum_coverage = len(cum_hist) / self.n_bins
-        cum_uniformity = 1 - jensenshannon(cum_hist, cum_hist_uni, base=2)
+        all_behavior_samples = torch.tensor(g[:, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1])
         
-        cumbent = float(max(all_behavior_samples))
-        return cum_coverage, cum_uniformity, cumbent
+        cell_size1 = (self.obj_ub1 - self.obj_lb1) / self.n_bins
+        cell_size2 = (self.obj_ub2 - self.obj_lb2) / self.n_bins
+        
+        indices_y1 = ((all_behavior_samples[:, 0] - self.obj_lb1) / cell_size1).floor().int()
+        indices_y2 = ((all_behavior_samples[:, 1] - self.obj_lb2) / cell_size2).floor().int()
+        grid_indices = torch.stack((indices_y1, indices_y2), dim=1)
+        unique_cells = set(map(tuple, grid_indices.tolist()))
+        return len(unique_cells)/(self.n_bins**2)
     
     def calculate_matric(self):
         all_population = self.population[0, :, :] # initial population
@@ -362,19 +373,19 @@ class Experiment:
         all_offspring = self.offsprings[0:(self.t+1), :, :] # all generated offspring
         all_offspring = all_offspring.reshape(-1, all_offspring.shape[-1])
         extended_population =  np.vstack((all_population, all_offspring))   
-        coverage, uniformity, cumbent = self.evaluate_coverage_and_uniformity_custom(extended_population)
+        coverage  = self.evaluate_coverage_and_uniformity_custom(extended_population)
         self.extended_population = extended_population
         # cumbent = float(max(extended_population))
         cost = self.n_offspring * (self.t + 1)
-        return coverage, uniformity, cost, cumbent
+        return coverage, cost
     
     def calculate_matric_initialize(self):
         all_population = self.population[0, :, :] # initial population
         all_population = all_population.reshape(-1, all_population.shape[-1])
   
-        coverage, uniformity, cumbent = self.evaluate_coverage_and_uniformity_custom(all_population)
+        coverage = self.evaluate_coverage_and_uniformity_custom(all_population)
         # cumbent = float(max(all_population))
-        return coverage, uniformity, cumbent
+        return coverage
         
     def run_novelty_search(self):
         """Applies the Novelty Search algorithm."""
@@ -382,10 +393,10 @@ class Experiment:
         # initialize the run - create a random population and add the best individuals to the archive
         self.initialize_population()
         self.initialize_archive()
-        coverage, uniformity, cumbent = self.calculate_matric_initialize()
+        coverage = self.calculate_matric_initialize()
         coverage_list=[coverage]
-        uniformity_list=[uniformity]
-        cumbent_list = [cumbent]
+        # uniformity_list=[uniformity]
+        # cumbent_list = [cumbent]
 
         cost_list = [0]
         # iterate
@@ -399,16 +410,16 @@ class Experiment:
             self.generate_offsprings() # use mutation to generate offspring
 
             # update the population novelty
-            self.population[self.t, :, self.I_NOVELTY] = self.compute_novelty(self.population[self.t, :, self.I_BEHAVIOR])
+            self.population[self.t, :, self.I_NOVELTY] = self.compute_novelty(self.population[self.t, :, self.I_BEHAVIOR1:self.I_BEHAVIOR2+1])
 
             # add the most novel offsprings to the archive
             self.select_and_add_to_archive()
 
             # calculate the reachability and uniformity for all genomes (sampled data)
-            coverage, uniformity, cost, cumbent = self.calculate_matric()
+            coverage, cost = self.calculate_matric()
             coverage_list.append(coverage)
-            uniformity_list.append(uniformity)
-            cumbent_list.append(cumbent)
+            # uniformity_list.append(uniformity)
+            # cumbent_list.append(cumbent)
             cost_list.append(cost)
             # torch.save(torch.tensor(torch.tensor(self.extended_population[:, self.I_GENOME])), 'train_x_DEA_seed'+str(self.seed)+'.pt')
             # torch.save(torch.tensor(torch.tensor(self.extended_population[:, self.I_BEHAVIOR])), 'train_y_DEA_seed'+str(self.seed)+'.pt')
@@ -420,7 +431,7 @@ class Experiment:
 
             self.t += 1
             
-        return coverage_list, uniformity_list, cost_list, cumbent_list
+        return coverage_list, cost_list
 
 
 
@@ -437,7 +448,7 @@ class Experiment:
         return d
 
 
-def create_and_run_experiment(params, display=False, seed=None,dim=2, obj_lb = -5, obj_ub = 5, lb=-5, ub=5):
+def create_and_run_experiment(params, display=False, seed=None,dim=2, obj_lb1 = -5, obj_ub1 = 5, obj_lb2 = -5, obj_ub2 = 5, lb=-5, ub=5):
     """Creates a Novelty Search algorithm and run the search according to the input parameters.
        It is possible to display the evolution of the search.
 
@@ -449,14 +460,14 @@ def create_and_run_experiment(params, display=False, seed=None,dim=2, obj_lb = -
         data (dict): dictionary containing the archive history, population history, and offsprings history
 
     """
-    my_exp = Experiment(params, display, seed, dim, obj_lb, obj_ub, lb, ub)
-    coverage_list, uniformity_list, cost_list, cumbent_list = my_exp.run_novelty_search()
+    my_exp = Experiment(params, display, seed, dim, obj_lb1, obj_ub1, obj_lb2, obj_ub2, lb, ub)
+    coverage_list,  cost_list = my_exp.run_novelty_search()
     # data = my_exp.get_results()
-    return coverage_list, uniformity_list, cost_list, cumbent_list
+    return coverage_list,  cost_list
 
-def run_sequentially(params,seed,dim,obj_lb,obj_ub,lb,ub):
-    coverage_list, uniformity_list, cost_list, cumbent_list = create_and_run_experiment(params,True,seed,dim,obj_lb,obj_ub,lb,ub)
-    return coverage_list, uniformity_list, cost_list, cumbent_list
+def run_sequentially(params,seed,dim,obj_lb1,obj_ub1,obj_lb2,obj_ub2,lb,ub):
+    coverage_list,  cost_list = create_and_run_experiment(params,True,seed,dim,obj_lb1,obj_ub1,obj_lb2,obj_ub2,lb,ub)
+    return coverage_list, cost_list
     
     
 

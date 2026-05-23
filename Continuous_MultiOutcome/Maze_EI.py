@@ -6,7 +6,6 @@ Created on Fri May  3 12:04:22 2024
 @author: tang.1856
 """
 
-import gymnasium as gym
 import torch
 import gpytorch
 from botorch.models import SingleTaskGP
@@ -25,7 +24,7 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
@@ -37,6 +36,9 @@ from typing import Dict, Optional, Tuple, Union
 from torch import Tensor
 from botorch.acquisition.objective import PosteriorTransform
 from botorch.acquisition import ExpectedImprovement
+import gymnasium as gym
+import gymnasium_robotics
+gym.register_envs(gymnasium_robotics)
 
 def policy(param, state):
        

@@ -4,7 +4,7 @@ parameters = {
     "eta": 45,                                 # mutation spread parameter
     "n_pop": 300,                               # number of individuals in the population (20)
     "n_offspring": 50,                         # number of offsprings generated from the population at each generation (40)
-    "criterion": "novelty",                    # type of novelty computation {'novelty', 'hull', 'fitness', 'random'}
+    "criterion": "hull",                    # type of novelty computation {'novelty', 'hull', 'fitness', 'random'}
     "n_neighbors": 10,                         # number of closest neighbors to compute the "novelty" criterion
     "best_fit": -4,                            # arbitrary behavior with the maximum fitness for the "fitness" criterion 
     "n_selected": 6,                           # number of offsprings added to the archive at each generation(6)

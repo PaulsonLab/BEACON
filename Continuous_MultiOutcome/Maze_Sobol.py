@@ -25,11 +25,12 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import gymnasium as gym
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
-
+import gymnasium as gym
+import gymnasium_robotics
+gym.register_envs(gymnasium_robotics)
 
 def policy(param, state):
     # p1 = param[0]*state[0] + param[1]*state[1] + param[2]*state[2] + param[3]*state[3] + param[4]
