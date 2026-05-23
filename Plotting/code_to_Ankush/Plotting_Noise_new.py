@@ -14,7 +14,7 @@ synthetic = '4DAckley'
 noise = [0.5,1,2,4]
 synthetic_name = ['\u03C3=0.5','\u03C3=1.0','\u03C3=2.0','\u03C3=4.0']
 
-save_path = "/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Noise/4DAckley/noise.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/code_to_Ankush/noise.mat"
 loaded_data = loadmat(save_path)
 
 fig, axes = plt.subplots(2, 2, figsize=(14, 14)) 

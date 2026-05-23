@@ -5,6 +5,8 @@ Created on Sun Mar 10 13:26:09 2024
 
 @author: tang.1856
 """
+import sys 
+sys.path.append("../")
 import torch
 import gpytorch
 from botorch.models import SingleTaskGP, SaasFullyBayesianSingleTaskGP, ModelListGP
@@ -23,19 +25,11 @@ from botorch.optim import optimize_acqf
 from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
-from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
-import pickle
 from botorch.models.transforms.outcome import Standardize
-import matplotlib.pyplot as plt
-import sys
-sys.path.append('/home/tang.1856/Jonathan/Novelty Search')
-from maze_NS import Maze
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
-from ThompsonSampling import EfficientThompsonSampler
+from src.ThompsonSampling import EfficientThompsonSampler
 from sklearn.cluster import KMeans
 import gymnasium as gym
-
 
 def policy(param, state):
     
@@ -81,9 +75,10 @@ class CustomAcquisitionFunction(AcquisitionFunction):
         
         self.ts_sampler1 = EfficientThompsonSampler(model.models[0])
         self.ts_sampler1.create_sample()
+        self.ts_sampler1.calculate_V()
         self.ts_sampler2 = EfficientThompsonSampler(model.models[1])
         self.ts_sampler2.create_sample()
-       
+        self.ts_sampler2.calculate_V()
         
     @t_batch_mode_transform(expected_q=1)
     def forward(self, X):
@@ -110,8 +105,6 @@ if __name__ == '__main__':
     N_init = 50
     replicate = 1
     BO_iter = 200
-    n_bins = 10
-    TS = 1 
     k_NN = 10
     
     lb = -1
@@ -126,7 +119,7 @@ if __name__ == '__main__':
         reward_list = []
         print('seed:',seed)
         np.random.seed(seed)
-        train_X = torch.tensor(np.random.rand(N_init+10, dim))
+        train_X = torch.tensor(np.random.rand(N_init, dim))
         train_y1,train_y2 = [],[]
         train_x = []
         
@@ -189,8 +182,7 @@ if __name__ == '__main__':
           
             cost_list.append(cost_list[-1]+1)           
             cumbent_list.append(float(max(reward_list)))
-            # torch.save(train_x, 'train_x_seed'+str(seed)+'.pt')
-            # torch.save(distance, 'distance_seed'+str(seed)+'.pt')
+           
             
         cost_tensor.append(cost_list)
         cumbent_tensor.append(cumbent_list)

@@ -24,12 +24,12 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
-import torchsort
+# import torchsort
 import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
 import sys
-sys.path.append('/home/tang.1856/Jonathan/Novelty Search')
+sys.path.append('/fs/ess/PAS2983/jontwt/BEACON/')
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from ThompsonSampling import EfficientThompsonSampler
 from sklearn.cluster import KMeans
@@ -116,7 +116,7 @@ if __name__ == '__main__':
       'total_POV_gravimetric'
     ])
 
-    file_path1 = '/home/tang.1856/Downloads/PMOF20K_traindata_7000_train.csv'
+    file_path1 = '/fs/ess/PAS2983/jontwt/BEACON/Material Data/PMOF20K_traindata_7000_train.csv'
     data1 = pd.read_csv(file_path1)
     y1 = data1['pure_uptake_CO2_298.00_15000']
     y2 = data1['pure_uptake_methane_298.00_580000']

@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt
 
 synthetic = 'Cluster'
 
-cost_NS_TS1 = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
-coverage_NS_TS1 = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
+cost_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
+coverage_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
 
-cost_BO = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
-coverage_BO = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_MaxVar.pt')
+cost_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
+coverage_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_MaxVar.pt')
 
-cost_RS = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
-coverage_RS = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_RS.pt')
+cost_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
+coverage_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_RS.pt')
 
 # cost_NS_mean = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_mean.pt')
 # coverage_NS_mean = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_mean.pt')
@@ -25,17 +25,17 @@ coverage_RS = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/
 # cost_GA_NS_random = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_random.pt')
 # coverage_GA_NS_random = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_random.pt')
 
-cost_GA_NS_novel = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_GA.pt')
-coverage_GA_NS_novel = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA.pt')
+cost_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_GA.pt')
+coverage_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA.pt')
 
-cost_DEA = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_DEA.pt')
-coverage_DEA = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_DEA.pt')
+cost_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_DEA.pt')
+coverage_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_DEA.pt')
 
-cost_sobol = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
-coverage_sobol = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_sobol.pt')
+cost_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
+coverage_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_sobol.pt')
 
-cost_NS_xspace = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_x_space.pt')
-coverage_NS_xspace = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_x_space.pt')
+cost_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_x_space.pt')
+coverage_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_x_space.pt')
 
 # cost_EI = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_logEI.pt')
 # coverage_EI = torch.load('/home/tang.1856/BEACON/BEACON/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_coverage_list_logEI.pt')

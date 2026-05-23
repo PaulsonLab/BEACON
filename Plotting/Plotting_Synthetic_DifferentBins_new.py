@@ -15,57 +15,57 @@ bins = [10,50,100,10,50,100]
 # synthetic = ['4DAckley', '4DAckley']
 # synthetic_name = ['Ackley 4D (grid=10)', 'Ackley 4D (grid=50)']
 # bins = [10,50]
-save_path = "/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Different Bins/different_grid.mat" # change the path
-# path = '/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Different Bins/'
-loaded_data = loadmat(save_path)
+# save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/code_to_Ankush/different_grid.mat" # change the path
+path = '/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/Different Bins/'
+# loaded_data = loadmat(save_path)
 
 fig, axes = plt.subplots(2, 3, figsize=(14, 14))  
 
 for i, ax in enumerate(axes.flat):
     
-    # cost_NS_TS1 = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_TS_1_cost_list_NS_'+'bins'+str(bins[i])+'.pt')
-    # coverage_NS_TS1 = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_TS_1_coverage_list_NS_'+'bins'+str(bins[i])+'.pt')
+    cost_NS_TS1 = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_TS_1_cost_list_NS_'+'bins'+str(bins[i])+'.pt')
+    coverage_NS_TS1 = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_TS_1_coverage_list_NS_'+'bins'+str(bins[i])+'.pt')
     
-    # cost_BO = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_MaxVar_'+'bins'+str(bins[i])+'.pt')
-    # coverage_BO = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_MaxVar_'+'bins'+str(bins[i])+'.pt')
+    cost_BO = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_MaxVar_'+'bins'+str(bins[i])+'.pt')
+    coverage_BO = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_MaxVar_'+'bins'+str(bins[i])+'.pt')
     
-    # cost_RS = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_RS_'+'bins'+str(bins[i])+'.pt')
-    # coverage_RS = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_RS_'+'bins'+str(bins[i])+'.pt')
-    
-    
-    # cost_GA_NS_novel = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_GA_'+'bins'+str(bins[i])+'.pt')
-    # coverage_GA_NS_novel = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_GA_'+'bins'+str(bins[i])+'.pt')
-    
-    # cost_DEA = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_DEA_'+'bins'+str(bins[i])+'.pt')
-    # coverage_DEA = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_DEA_'+'bins'+str(bins[i])+'.pt')
-    
-    # cost_sobol = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_sobol_'+'bins'+str(bins[i])+'.pt')
-    # coverage_sobol = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_sobol_'+'bins'+str(bins[i])+'.pt')
-    
-    # cost_NS_xspace = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_x_space_'+'bins'+str(bins[i])+'.pt')
-    # coverage_NS_xspace = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_x_space_'+'bins'+str(bins[i])+'.pt')
-    
-    cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
-    coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
-    
-    cost_BO = torch.tensor(loaded_data['cost_BO_'+str(i)])
-    coverage_BO = torch.tensor(loaded_data['coverage_BO_'+str(i)])
-    
-    cost_RS = torch.tensor(loaded_data['cost_RS_'+str(i)])
-    coverage_RS = torch.tensor(loaded_data['coverage_RS_'+str(i)])
+    cost_RS = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_RS_'+'bins'+str(bins[i])+'.pt')
+    coverage_RS = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_RS_'+'bins'+str(bins[i])+'.pt')
     
     
-    cost_GA_NS_novel = torch.tensor(loaded_data['cost_GA_NS_novel_'+str(i)])
-    coverage_GA_NS_novel = torch.tensor(loaded_data['coverage_GA_NS_novel_'+str(i)])
+    cost_GA_NS_novel = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_GA_'+'bins'+str(bins[i])+'.pt')
+    coverage_GA_NS_novel = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_GA_'+'bins'+str(bins[i])+'.pt')
     
-    cost_DEA = torch.tensor(loaded_data['cost_DEA_'+str(i)])
-    coverage_DEA = torch.tensor(loaded_data['coverage_DEA_'+str(i)])
+    cost_DEA = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_DEA_'+'bins'+str(bins[i])+'.pt')
+    coverage_DEA = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_DEA_'+'bins'+str(bins[i])+'.pt')
     
-    cost_sobol = torch.tensor(loaded_data['cost_sobol_'+str(i)])
-    coverage_sobol = torch.tensor(loaded_data['coverage_sobol_'+str(i)])
+    cost_sobol = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_sobol_'+'bins'+str(bins[i])+'.pt')
+    coverage_sobol = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_sobol_'+'bins'+str(bins[i])+'.pt')
     
-    cost_NS_xspace = torch.tensor(loaded_data['cost_NS_xspace_'+str(i)])
-    coverage_NS_xspace = torch.tensor(loaded_data['coverage_NS_xspace_'+str(i)])
+    cost_NS_xspace = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_x_space_'+'bins'+str(bins[i])+'.pt')
+    coverage_NS_xspace = torch.load(path+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_x_space_'+'bins'+str(bins[i])+'.pt')
+    
+    # cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
+    # coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
+    
+    # cost_BO = torch.tensor(loaded_data['cost_BO_'+str(i)])
+    # coverage_BO = torch.tensor(loaded_data['coverage_BO_'+str(i)])
+    
+    # cost_RS = torch.tensor(loaded_data['cost_RS_'+str(i)])
+    # coverage_RS = torch.tensor(loaded_data['coverage_RS_'+str(i)])
+    
+    
+    # cost_GA_NS_novel = torch.tensor(loaded_data['cost_GA_NS_novel_'+str(i)])
+    # coverage_GA_NS_novel = torch.tensor(loaded_data['coverage_GA_NS_novel_'+str(i)])
+    
+    # cost_DEA = torch.tensor(loaded_data['cost_DEA_'+str(i)])
+    # coverage_DEA = torch.tensor(loaded_data['coverage_DEA_'+str(i)])
+    
+    # cost_sobol = torch.tensor(loaded_data['cost_sobol_'+str(i)])
+    # coverage_sobol = torch.tensor(loaded_data['coverage_sobol_'+str(i)])
+    
+    # cost_NS_xspace = torch.tensor(loaded_data['cost_NS_xspace_'+str(i)])
+    # coverage_NS_xspace = torch.tensor(loaded_data['coverage_NS_xspace_'+str(i)])
     
     
     coverage_NS_mean_TS1 = torch.mean(coverage_NS_TS1, dim = 0)

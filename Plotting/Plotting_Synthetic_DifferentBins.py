@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 synthetic = '4DAckley'
 bins = 100
-path = '/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/Different Bins/'
+path = '/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/Different Bins/'
 cost_NS_TS1 = torch.load(path+synthetic+'/'+synthetic+'_TS_1_cost_list_NS_'+'bins'+str(bins)+'.pt')
 coverage_NS_TS1 = torch.load(path+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS_'+'bins'+str(bins)+'.pt')
 

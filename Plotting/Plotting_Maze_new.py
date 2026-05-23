@@ -41,7 +41,7 @@ synthetic = 'Maze'
 # cost_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
 # coverage_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_sobol.pt')
 
-save_path = "/home/tang.1856/BEACON/BEACON/Plotting/Maze.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/Maze.mat"
 loaded_data = loadmat(save_path)
 
 i=0

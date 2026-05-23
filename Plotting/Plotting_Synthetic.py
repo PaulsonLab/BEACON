@@ -10,35 +10,35 @@ import matplotlib.pyplot as plt
 
 synthetic = '12DStyTang'
 
-cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
-coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
+cost_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
+coverage_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_TS_1_coverage_list_NS.pt')
 
-cost_BO = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
-coverage_BO = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_MaxVar.pt')
+cost_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
+coverage_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_MaxVar.pt')
 
-cost_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
-coverage_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_RS.pt')
+cost_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
+coverage_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_RS.pt')
 
-cost_NS_mean = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_mean.pt')
-coverage_NS_mean = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_mean.pt')
+cost_NS_mean = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_mean.pt')
+coverage_NS_mean = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_mean.pt')
 
-cost_GA_NS_random = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_random.pt')
-coverage_GA_NS_random = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_random.pt')
+cost_GA_NS_random = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_random.pt')
+coverage_GA_NS_random = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_random.pt')
 
-cost_GA_NS_novel = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_novel.pt')
-coverage_GA_NS_novel = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_novel.pt')
+cost_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_novel.pt')
+coverage_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_novel.pt')
 
-cost_DEA = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_DEA.pt')
-coverage_DEA = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_DEA.pt')
+cost_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_GA_DEA.pt')
+coverage_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_GA_DEA.pt')
 
-cost_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
-coverage_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_sobol.pt')
+cost_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
+coverage_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_sobol.pt')
 
-cost_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_x_space.pt')
-coverage_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_x_space.pt')
+cost_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_x_space.pt')
+coverage_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_NS_x_space.pt')
 
-cost_EI = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_logEI.pt')
-coverage_EI = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_logEI.pt')
+# cost_EI = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_cost_list_logEI.pt')
+# coverage_EI = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic+'/'+synthetic+'_coverage_list_logEI.pt')
 
 
 
@@ -78,9 +78,9 @@ coverage_NS_xspace_mean = torch.mean(coverage_NS_xspace, dim = 0)
 coverage_NS_xspace_std = torch.std(coverage_NS_xspace , dim = 0)
 cost_NS_xspace_mean = torch.mean(cost_NS_xspace , dim = 0)
 
-coverage_EI_mean = torch.mean(coverage_EI, dim = 0)
-coverage_EI_std = torch.std(coverage_EI , dim = 0)
-cost_EI_mean = torch.mean(cost_EI , dim = 0)
+# coverage_EI_mean = torch.mean(coverage_EI, dim = 0)
+# coverage_EI_std = torch.std(coverage_EI , dim = 0)
+# cost_EI_mean = torch.mean(cost_EI , dim = 0)
 
 text_size = 24
 marker_size = 18
@@ -98,7 +98,7 @@ plt.plot(cost_DEA_mean, coverage_DEA_mean, label='NS-DEA', marker='D', markersiz
 plt.plot(cost_NS_xspace_mean[::marker_interval], coverage_NS_xspace_mean[::marker_interval], label='NS-FS', marker='p', markersize=marker_size, linewidth=linewidth )
 plt.plot(cost_sobol_mean[::marker_interval], coverage_sobol_mean[::marker_interval], label='Sobol', marker='o', markersize=marker_size, linewidth=linewidth )
 plt.plot(cost_RS_mean[::marker_interval], coverage_RS_mean[::marker_interval], label='RS', marker='v', markersize=marker_size, linewidth=linewidth )
-plt.plot(cost_EI_mean[::marker_interval], coverage_EI_mean[::marker_interval], label='EI', marker='*', markersize=marker_size, linewidth=linewidth )
+# plt.plot(cost_EI_mean[::marker_interval], coverage_EI_mean[::marker_interval], label='EI', marker='*', markersize=marker_size, linewidth=linewidth )
 
 plt.fill_between(cost_NS_mean_TS1, coverage_NS_mean_TS1 - coverage_NS_std_TS1, coverage_NS_mean_TS1 + coverage_NS_std_TS1,  alpha=alpha)
 plt.fill_between(cost_BO_mean, coverage_BO_mean - coverage_BO_std, coverage_BO_mean + coverage_BO_std,  alpha=alpha)
@@ -107,7 +107,7 @@ plt.fill_between(cost_DEA_mean, coverage_DEA_mean - coverage_DEA_std, coverage_D
 plt.fill_between(cost_NS_xspace_mean, coverage_NS_xspace_mean - coverage_NS_xspace_std, coverage_NS_xspace_mean + coverage_NS_xspace_std,  alpha=alpha)
 plt.fill_between(cost_sobol_mean, coverage_sobol_mean - coverage_sobol_std, coverage_sobol_mean + coverage_sobol_std,  alpha=alpha)
 plt.fill_between(cost_RS_mean, coverage_RS_mean - coverage_RS_std, coverage_RS_mean + coverage_RS_std,  alpha=alpha)
-plt.fill_between(cost_EI_mean, coverage_EI_mean - coverage_EI_std, coverage_EI_mean + coverage_EI_std,  alpha=alpha)
+# plt.fill_between(cost_EI_mean, coverage_EI_mean - coverage_EI_std, coverage_EI_mean + coverage_EI_std,  alpha=alpha)
 
 plt.xlabel('Number of evaluations', fontsize=text_size, fontweight=weight)
 plt.ylabel('Reachability', fontsize=text_size, fontweight=weight)

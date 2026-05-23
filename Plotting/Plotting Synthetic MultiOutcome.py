@@ -20,7 +20,7 @@ def synthetic_function(x):
 
 
 # Create a large figure with 2 subplots
-fig = plt.figure(figsize=(12, 12))
+fig = plt.figure(figsize=(10, 10),dpi=300)
 outer_gs = fig.add_gridspec(2, 1, wspace=0.3)  # Two subplots side by side
 
 text_size = 16
@@ -37,6 +37,8 @@ gs = outer_gs[0].subgridspec(2, 2, width_ratios=(4, 1), height_ratios=(1, 4), ws
 ax = fig.add_subplot(gs[1, 0])  # Main scatter plot
 ax_histx = fig.add_subplot(gs[0, 0], sharex=ax)  # Marginal histogram for x-axis
 ax_histy = fig.add_subplot(gs[1, 1], sharey=ax)  # Marginal histogram for y-axis
+ax_histx.tick_params(axis="both", labelsize=text_size)
+ax_histy.tick_params(axis="both", labelsize=text_size)
 
 # Scatter plot and histograms
 ax.scatter(x, y, alpha=0.5, edgecolors='none', s=4)
@@ -45,6 +47,7 @@ ax.set_xticks(np.linspace(-5, 5, 11))
 ax.set_yticks(np.linspace(-5, 5, 11))
 ax.set_xlim(-5, 5)
 ax.set_ylim(-5, 5)
+
 
 binwidth = 0.25
 bins = np.arange(-5, 5 + binwidth, binwidth)
@@ -58,15 +61,18 @@ ax_histy.tick_params(axis="y", labelleft=False)
 # Customize labels
 ax.set_xlabel('y1', fontsize=text_size)
 ax.set_ylabel('y2', fontsize=text_size)
+ax.tick_params(axis="both", labelsize=text_size)
 
 # second figure
 synthetic = 'Cluster'
-save_path = "/home/tang.1856/BEACON/BEACON/Plotting/multioutcome.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/multioutcome.mat"
 loaded_data = loadmat(save_path)
 i=0
 
-cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
-coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
+# cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
+# coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
+cost_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Cluster_cost_list_BEACON.pt')
+coverage_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Cluster_coverage_list_BEACON.pt')
 
 cost_BO = torch.tensor(loaded_data['cost_BO_'+str(i)])
 coverage_BO = torch.tensor(loaded_data['coverage_BO_'+str(i)])
@@ -115,7 +121,7 @@ cost_sobol_mean = torch.mean(cost_sobol , dim = 0)
 
 marker_size = 18
 linewidth=4
-marker_interval = 20
+marker_interval = 25
 weight='bold'
 alpha = 0.3
 
@@ -142,7 +148,12 @@ ax2.fill_between(cost_RS_mean, coverage_RS_mean - coverage_RS_std, coverage_RS_m
 ax2.set_xlabel('Number of evaluations', fontsize=text_size)
 ax2.set_ylabel('Reachability', fontsize=text_size)
 ax2.legend(prop={'size':text_size})
+# ax2.set_ylim(0,1)
 ax2.grid(alpha=0.5, linewidth=2.0)
+ax2.tick_params(axis="both", labelsize=text_size)
+
+# plt.tight_layout()
+plt.savefig('Synthetic_Multioutcome.png',dpi=300)
 
         
 
