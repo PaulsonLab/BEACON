@@ -21,7 +21,7 @@ alpha = 0.3
 
 indice = [0,3,5,7,9,10,11,12,13,15]
 
-save_path = "/home/tang.1856/BEACON/BEACON/Plotting/MNIST.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/MNIST.mat"
 loaded_data = loadmat(save_path)
 
 i=0

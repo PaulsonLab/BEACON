@@ -11,7 +11,7 @@ import matplotlib.image as mpimg
 from scipy.io import loadmat
 import torch
 
-save_path = "/home/tang.1856/BEACON/BEACON/Plotting/OilSorbent.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/OilSorbent.mat"
 loaded_data = loadmat(save_path)
 
 i=0
@@ -61,7 +61,7 @@ text_size = 16
 fig, axes = plt.subplots(2, 1, figsize=(6, 6), dpi=150)  # 1 row, 2 columns
 
 # Second subplot: display the PNG image
-img = mpimg.imread('/home/tang.1856/BEACON/BEACON/Plotting/OilSorbent_distribution.png')  # Replace 'your_image.png' with your file path
+img = mpimg.imread('/fs/ess/PAS2983/jontwt/BEACON/Plotting/OilSorbent_distribution.png')  # Replace 'your_image.png' with your file path
 axes[0].imshow(img)
 axes[0].axis('off')  # Hide axes for the image
 # axes[0].set_title('PNG Image')

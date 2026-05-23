@@ -19,7 +19,7 @@ linewidth=4
 weight='bold'
 alpha = 0.3
 
-save_path = "/home/tang.1856/BEACON/BEACON/Plotting/SmallMolecule.mat"
+save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/SmallMolecule.mat"
 loaded_data = loadmat(save_path)
 
 
