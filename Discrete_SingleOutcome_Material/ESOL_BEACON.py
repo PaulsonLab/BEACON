@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Mon Apr 15 15:16:27 2024
+
+@author: tang.1856
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Sun Mar 10 13:26:09 2024
 
 @author: tang.1856
@@ -25,12 +33,51 @@ from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley
 import pickle
 from botorch.models.transforms.outcome import Standardize
-
+from botorch import fit_gpytorch_mll
+import matplotlib.pyplot as plt
 import pandas as pd
+import math
+from gauche.dataloader import MolPropLoader,ReactionLoader
+from gpytorch.means import ConstantMean
+from gauche.kernels.fingerprint_kernels.tanimoto_kernel import TanimotoKernel
+from gpytorch.distributions import MultivariateNormal
+from sklearn.model_selection import train_test_split
 
+class TanimotoGP(SingleTaskGP):
 
+    def __init__(self, train_X, train_Y):
+        super().__init__(train_X, train_Y, likelihood=GaussianLikelihood(), outcome_transform=Standardize(m=1))
+        self.mean_module = ConstantMean()
+        self.covar_module = ScaleKernel(base_kernel=TanimotoKernel())
+        self.to(train_X)  # make sure we're on the right device/dtype
 
-def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist = 25):
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        return MultivariateNormal(mean_x, covar_x)
+    
+def initialize_model(train_x, train_obj, state_dict=None):
+    """
+    Initialise model and loss function.
+
+    Args:
+        train_x: tensor of inputs
+        train_obj: tensor of outputs
+        state_dict: current state dict used to speed up fitting
+
+    Returns: mll object, model object
+    """
+
+    # define model for objective
+    model = TanimotoGP(train_x, train_obj).to(train_x)
+    mll = ExactMarginalLogLikelihood(model.likelihood, model)
+    # load state dict if it is passed
+    if state_dict is not None:
+        model.load_state_dict(state_dict)
+
+    return mll, model
+
+def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist=25):
     behavior = behavior.squeeze(1).numpy()
     num = len(behavior)
     cum_hist, _ = np.histogram(behavior, np.linspace(obj_lb, obj_ub, n_bins + 1))
@@ -42,7 +89,7 @@ def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hi
     
     return cum_coverage, cum_uniformity
     
-
+        
 class CustomAcquisitionFunction_TS():
     def __init__(self, model, sampled_behavior, k=10, TS = 1):
         
@@ -59,19 +106,6 @@ class CustomAcquisitionFunction_TS():
             num_samples: The number of samples to draw.
             
         """
-              
-        # For H2 data set we might need to sample with for loop because of the large data set that might crash the memory (uncommented the following lines)
-        # batch_shape x N x m
-        # X = X.unsqueeze(0)
-        # posterior = self.model.posterior(X[:,0:1000])
-        # samples = posterior.rsample(sample_shape=torch.Size([self.TS])) # Thompson Sampling
-        # for r in range(1,math.ceil(len(X[0])/1000)):           
-        #     posterior = self.model.posterior(X[:, int(r*1000):int((r+1))*1000])
-        #     samples_new = posterior.rsample(sample_shape=torch.Size([self.TS])) # Thompson Sampling
-        #     samples = torch.cat((samples, samples_new), dim=2)
-        # samples = samples.squeeze(1)
-        
-        # For other data sets we can sample at once
         # batch_shape x N x m
         X = X.unsqueeze(0)
         posterior = self.model.posterior(X)
@@ -79,10 +113,11 @@ class CustomAcquisitionFunction_TS():
         # num_samples x batch_shape x N x m
         samples = posterior.rsample(sample_shape=torch.Size([self.TS])).squeeze(1) # Thompson Sampling
         
+        
         acquisition_values = []
         for ts in range(self.TS): # different TS sample
             
-            dist = torch.cdist(samples[ts], self.sampled_behavior).squeeze(0)
+            dist = torch.cdist(samples[ts], self.sampled_behavior).squeeze(1)
             dist, _ = torch.sort(dist, dim = 1) # sort the distance 
             n = dist.size()[1]
             E = torch.cat((torch.ones(self.k), torch.zeros(n-self.k)), dim = 0) # find the k-nearest neighbor
@@ -92,47 +127,36 @@ class CustomAcquisitionFunction_TS():
         acquisition_values = torch.stack(acquisition_values)
         acquisition_values = torch.max(acquisition_values, dim=0).values
         
-        
         return acquisition_values.flatten()
     
 
 if __name__ == '__main__':
     
-    
+    dim = 2133
     N_init = 10
     replicate = 20
-    n_bins = 25 
-    k = 10 
-    TS = 1 
-    BO_iter = 500
+    n_bins = 25 # number of bins used to calculate the reachability and uniformity 
+    k = 10 # number of k-nearest neighbor
+    TS = 1 # number of TS samples
+    BO_iter = 200
     
     cost_tensor = []
     coverage_tensor = []
     
-    # Case Study 1: Hydrogen adsorption
-    # load H2 adsorption MOF data from pkl file 
-    #dim = 8
-    # X_original = pickle.load(open('/fs/ess/PAS2983/jontwt/BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['x'] # data from Ghude and Chowdhury 2023 (7 features for MOFs)
-    # y_original = pickle.load(open('/fs/ess/PAS2983/jontwt/BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['y'] # data from Ghude and Chowdhury 2023 (H2 adsorp capacity)
-    
-    # Case Study 2
-    df = pd.read_csv('/fs/ess/PAS2983/jontwt/BEACON/Material Data/Nitrogen.csv') # data from Daglar et al.
-    dim = 20
-    X_original = (df.iloc[:, 1:(1+dim)]).values
-    y_original = df['U_N2 (mol/kg)'].values
-    
-    # Case Study 3: Water Solubility
-    # load water solubility data from csv file 
-    # df = pd.read_csv('/fs/ess/PAS2983/jontwt/BEACON/Material Data/water_set_wide_descriptors.csv') # data from Qiao et al.
-    # dim = 14
-    # X_original = (df.iloc[:, 4:(4+dim)]).values
-    # y_original = df.iloc[:, 3].values
-      
-    
+    # Load the Photoswitch dataset
+    loader = MolPropLoader()
+    loader.load_benchmark("ESOL")
+    # loader.read_csv("/home/tang.1856/Jonathan/Novelty Search/MultiObj/SMILES_Malaria.csv_with_SAScore.csv", "SMILES","y1")
+    # We use the fragprints representations (a concatenation of Morgan fingerprints and RDKit fragment features)
+    loader.featurize('ecfp_fragprints')
+    # loader.featurize('drfp')
+    X_original = loader.features
+    y_original = loader.labels
+           
     y_original = np.reshape(y_original, (np.size(y_original), 1)) 
     X_original = torch.from_numpy(X_original)
     
-    X_original = (X_original - X_original.min(dim=0).values)/(X_original.max(dim=0).values - X_original.min(dim=0).values) # normalize the original input data
+    # X_original = (X_original - X_original.min(dim=0).values)/(X_original.max(dim=0).values - X_original.min(dim=0).values) # normalize the original input data
     y_original = torch.from_numpy(y_original)
     
     n_hist = float(torch.count_nonzero(torch.histc(y_original,bins=n_bins)))
@@ -140,22 +164,30 @@ if __name__ == '__main__':
     obj_ub = y_original.max() # obj maximum 
     
     for seed in range(replicate):
-        # print('seed:',seed+)
+        print('seed:',seed)
         np.random.seed(seed)
         ids_acquired = np.random.choice(np.arange((len(y_original))), size=N_init, replace=False)
+        all_indices = np.arange(len(y_original))
+        remaining_indices = np.setdiff1d(all_indices, ids_acquired) # indices for testing data
         train_x = X_original[ids_acquired]
         train_y = y_original[ids_acquired]
+        test_x = X_original[remaining_indices]
+        test_y = y_original[remaining_indices]
        
-        coverage, uniformity = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub, n_hist)
+        
+        # ids_acquired_test = np.random.choice(np.arange((len(y_original))), size=100, replace=False)
+        # test_x = X_original[ids_acquired_test]
+        # test_y= y_original[ids_acquired_test]
+        
+        coverage, uniformity = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub, n_hist) # Calculate the initial reachability and uniformity
         
         coverage_list = [coverage]
-        cost_list = [0]
-    
+        cost_list = [0] # number of sampled data excluding initial data
+        
         # Start BO loop
         for i in range(BO_iter):        
             
-            model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=1))
-            mll = ExactMarginalLogLikelihood(model.likelihood, model)
+            mll, model = initialize_model(train_x.to(torch.float64), train_y.to(torch.float64))
             fit_gpytorch_mll(mll)
             
             custom_acq_function = CustomAcquisitionFunction_TS(model, train_y, k=k, TS = TS)
@@ -171,20 +203,19 @@ if __name__ == '__main__':
             ids_acquired = np.concatenate((ids_acquired, [id_max_aquisition]))
             train_x = X_original[ids_acquired]
             train_y = y_original[ids_acquired] 
-            
+                        
             coverage, uniformity = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub, n_hist)
             coverage_list.append(coverage)
             cost_list.append(cost_list[-1] + len([id_max_aquisition]))
-            
+    
         cost_tensor.append(cost_list)
         coverage_tensor.append(coverage_list)
-           
+       
+    
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
-    torch.save(coverage_tensor, 'N2uptake_TS_1_coverage_list_NS.pt')
-    torch.save(cost_tensor, 'N2uptake_TS_1_cost_list_NS.pt')  
-    
-    
+    torch.save(coverage_tensor, 'ESOL_TS_1_coverage_list_NS.pt')
+    torch.save(cost_tensor, 'ESOL_TS_1_cost_list_NS.pt')      
     
 
 
