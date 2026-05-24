@@ -8,7 +8,7 @@ pip install -r requirements.txt
 ```
 
 # Usage
-We provide the code scripts for executing BEACON on different problem setting. Each folder corresponds to specific problem setting (continuous/discrete search space and single/multi outcome space). All benchmark problems studied in the main paper section is included (Ackley/Rosenbrock/StyblinskiTang, Material Discovery, Moleculer Discovery, Maze, and MNIST). 
+We provide the code scripts for executing BEACON on different problem setting. Each folder corresponds to specific problem setting (continuous/discrete decision variable space and single/multi outcome space). All benchmark problems studied in the main paper section is included (Ackley/Rosenbrock/StyblinskiTang, Material Discovery, Moleculer Discovery, Maze, and MNIST). 
 
 Noted that BEACON requires the usage of [ThompsonSampling.py](https://github.com/PaulsonLab/BEACON/blob/main/src/ThompsonSampling.py) file to perform efficient Thompson sampling strategy proposed in [this work](https://arxiv.org/abs/2002.09309).
 
