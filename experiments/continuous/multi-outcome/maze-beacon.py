@@ -3,6 +3,7 @@
 """Run the maze continuous multi-outcome BEACON study.
 
 Inputs: Gymnasium robotics environment.
+Outputs: cost.pt and incumbent-reward.pt in results/generated/continuous/multi-outcome/maze-beacon.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import sys
@@ -18,19 +19,20 @@ from gpytorch.kernels import MaternKernel, RBFKernel, ScaleKernel
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from torch.quasirandom import SobolEngine
-from botorch.fit import fit_gpytorch_mll,fit_fully_bayesian_model_nuts
+from botorch.fit import fit_fully_bayesian_model_nuts
 from botorch.utils import standardize
 import botorch
 from typing import Tuple
 from botorch.utils.transforms import t_batch_mode_transform
 from botorch.acquisition import AcquisitionFunction, AnalyticAcquisitionFunction
 from botorch.acquisition.multi_objective.analytic import MultiObjectiveAnalyticAcquisitionFunction
-from botorch.optim import optimize_acqf
 from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.models.transforms.outcome import Standardize
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
+from beacon.optimization import DTYPE, fit_gpytorch_mll_quiet, optimize_acqf_quiet
+from beacon.paths import GENERATED_RESULTS_DIR
 from beacon.thompson_sampling import EfficientThompsonSampler
 from sklearn.cluster import KMeans
 import gymnasium as gym
@@ -94,10 +96,18 @@ class CustomAcquisitionFunction(AcquisitionFunction):
         samples_x = self.ts_sampler1.query_sample(X)
         samples_y = self.ts_sampler2.query_sample(X)
         samples = torch.cat((samples_x, samples_y),dim=1)
-        dist = torch.cdist(samples.to(torch.float64), self.sampled_behavior.to(torch.float64))
+        samples = samples.to(dtype=self.sampled_behavior.dtype, device=self.sampled_behavior.device)
+        dist = torch.cdist(samples, self.sampled_behavior)
         dist, _ = torch.sort(dist, dim = 1) # sort the distance 
         n = dist.size()[1]
-        E = torch.cat((torch.ones(self.k_NN), torch.zeros(n-self.k_NN)), dim = 0) # find the k-nearest neighbor
+        nearest = min(self.k_NN, n)
+        E = torch.cat(
+            (
+                torch.ones(nearest, dtype=dist.dtype, device=dist.device),
+                torch.zeros(n - nearest, dtype=dist.dtype, device=dist.device),
+            ),
+            dim=0,
+        ) # find the k-nearest neighbor
         dist = dist*E
         acquisition_values = torch.sum(dist,dim=1)
         
@@ -125,7 +135,7 @@ if __name__ == '__main__':
         reward_list = []
         print('seed:',seed)
         np.random.seed(seed)
-        train_X = torch.tensor(np.random.rand(N_init, dim))
+        train_X = torch.tensor(np.random.rand(N_init, dim), dtype=DTYPE)
         train_y1,train_y2 = [],[]
         train_x = []
         
@@ -139,9 +149,9 @@ if __name__ == '__main__':
             if len(train_x)>=N_init:
                 break
             
-        train_x = torch.tensor(train_x)
-        train_y1 = torch.tensor(train_y1)
-        train_y2 = torch.tensor(train_y2)
+        train_x = torch.tensor(train_x, dtype=DTYPE)
+        train_y1 = torch.tensor(train_y1, dtype=DTYPE)
+        train_y2 = torch.tensor(train_y2, dtype=DTYPE)
         train_y = torch.stack((train_y1, train_y2),dim=1)
             
         best_reward = float(max(reward_list))
@@ -154,14 +164,14 @@ if __name__ == '__main__':
             
             model_list = []
             for nx in range(2):
-                covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim))
-                model_list.append(SingleTaskGP(train_x.to(torch.float64), train_y[:,nx].unsqueeze(1).to(torch.float64), outcome_transform=Standardize(m=1), covar_module=covar_module))
+                covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)).to(dtype=DTYPE)
+                model_list.append(SingleTaskGP(train_x, train_y[:,nx].unsqueeze(1), outcome_transform=Standardize(m=1), covar_module=covar_module))
             model = ModelListGP(*model_list)
             mll = SumMarginalLogLikelihood(model.likelihood, model)
             try:
-                fit_gpytorch_mll(mll)
-            except:
-                print('Fail to fit GP!')
+                fit_gpytorch_mll_quiet(mll, model=model, seed=seed, iteration=i)
+            except Exception as exc:
+                raise RuntimeError(f"Failed to fit GP at seed={seed}, iteration={i}") from exc
             model.models[0].train_x = train_x
             model.models[0].train_y = train_y[:,0].unsqueeze(1)
             model.models[1].train_x = train_x
@@ -169,20 +179,21 @@ if __name__ == '__main__':
 
             custom_acq_function = CustomAcquisitionFunction(model, train_y, k_NN=k_NN)
                 
-            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=torch.float) 
+            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=DTYPE)
             # Optimize the acquisition function (continuous)
-            candidate, acq_value = optimize_acqf(
+            candidate, acq_value = optimize_acqf_quiet(
                 acq_function=custom_acq_function,
                 bounds=bounds,
-                q=1,  
-                num_restarts=10,  
-                raw_samples=20, 
+                q=1,
+                seed=seed,
+                iteration=i,
+                model=model,
             )
 
                            
             train_x = torch.cat((train_x, candidate))
             loc, reward = environment(lb+(ub-lb)*candidate.flatten())            
-            train_y = torch.cat((train_y, torch.tensor(loc).unsqueeze(0)))
+            train_y = torch.cat((train_y, torch.tensor(loc, dtype=DTYPE).unsqueeze(0)))
             reward_list.append(reward)
             
           
@@ -195,5 +206,9 @@ if __name__ == '__main__':
            
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32)  
     cumbent_tensor = torch.tensor(cumbent_tensor, dtype=torch.float32)  
-    torch.save(cost_tensor, 'Maze_TS_1_cost_list_NS.pt')  
-    torch.save(cumbent_tensor, 'Maze_TS_1_cumbent_list_NS.pt')  
+
+    output_dir = GENERATED_RESULTS_DIR / "continuous" / "multi-outcome" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(cost_tensor, output_dir / "cost.pt")
+    torch.save(cumbent_tensor, output_dir / "incumbent-reward.pt")
+    print(f"Saved generated results to {output_dir}")

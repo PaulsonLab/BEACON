@@ -3,6 +3,7 @@
 """Run the synthetic continuous multi-outcome BEACON study.
 
 Inputs: synthetic two-output function defined in this script.
+Outputs: coverage.pt in results/generated/continuous/multi-outcome/synthetic-beacon.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import sys
@@ -14,13 +15,13 @@ sys.path.insert(0, str(REPO_ROOT))
 import torch
 from botorch.models import SingleTaskGP, ModelListGP
 from gpytorch.kernels import MaternKernel, RBFKernel, ScaleKernel
-from botorch.fit import fit_gpytorch_mll
 from botorch.utils.transforms import t_batch_mode_transform
 from botorch.acquisition import AcquisitionFunction, AnalyticAcquisitionFunction
-from botorch.optim import optimize_acqf
 import numpy as np
 from botorch.models.transforms.outcome import Standardize
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
+from beacon.optimization import DTYPE, fit_gpytorch_mll_quiet, optimize_acqf_quiet
+from beacon.paths import GENERATED_RESULTS_DIR
 from beacon.thompson_sampling import EfficientThompsonSampler
 
 def synthetic_function(x):
@@ -67,10 +68,18 @@ class CustomAcquisitionFunction(AcquisitionFunction):
         
         samples = torch.cat(sample_list,1)
        
-        dist = torch.cdist(samples.to(torch.float64), self.sampled_behavior.to(torch.float64)) # calculate the two norm between each Thompson sampled behavior with sampled behavior
+        samples = samples.to(dtype=self.sampled_behavior.dtype, device=self.sampled_behavior.device)
+        dist = torch.cdist(samples, self.sampled_behavior) # calculate the two norm between each Thompson sampled behavior with sampled behavior
         dist, _ = torch.sort(dist, dim = 1) # sort the distance 
         n = dist.size()[1]
-        E = torch.cat((torch.ones(self.k_NN), torch.zeros(n-self.k_NN)), dim = 0) # find the k-nearest neighbor
+        nearest = min(self.k_NN, n)
+        E = torch.cat(
+            (
+                torch.ones(nearest, dtype=dist.dtype, device=dist.device),
+                torch.zeros(n - nearest, dtype=dist.dtype, device=dist.device),
+            ),
+            dim=0,
+        ) # find the k-nearest neighbor
         dist = dist*E
         acquisition_values = torch.sum(dist, dim=1)
         
@@ -98,8 +107,8 @@ if __name__ == '__main__':
         np.random.seed(seed)
         
         # generate initial training data
-        train_x = torch.tensor(np.random.rand(N_init, dim))
-        train_y = synthetic_function(lb+(ub-lb)*train_x)
+        train_x = torch.tensor(np.random.rand(N_init, dim), dtype=DTYPE)
+        train_y = synthetic_function(lb+(ub-lb)*train_x).to(dtype=DTYPE)
 
         coverage = reachability(train_y, n_bins, obj_lb, obj_ub) # Calculate the initial reachability        
         coverage_list = [coverage]
@@ -111,35 +120,36 @@ if __name__ == '__main__':
             # build model list
             model_list = []
             for nx in range(N_output):
-                covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim))
-                model_list.append(SingleTaskGP(train_x.to(torch.float64), train_y[:,nx].unsqueeze(1).to(torch.float64), outcome_transform=Standardize(m=1), covar_module=covar_module))
+                covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)).to(dtype=DTYPE)
+                model_list.append(SingleTaskGP(train_x, train_y[:,nx].unsqueeze(1), outcome_transform=Standardize(m=1), covar_module=covar_module))
             model = ModelListGP(*model_list)
             mll = SumMarginalLogLikelihood(model.likelihood, model)
             
             # Fit the GPs
             try:
-                fit_gpytorch_mll(mll)
-            except:
-                print('Fail to fit GP!')
+                fit_gpytorch_mll_quiet(mll, model=model, seed=seed, iteration=i)
+            except Exception as exc:
+                raise RuntimeError(f"Failed to fit GP at seed={seed}, iteration={i}") from exc
             
             for nx in range(N_output):
                 model.models[nx].train_x = train_x
                 model.models[nx].train_y = train_y[:,nx].unsqueeze(1)
            
             custom_acq_function = CustomAcquisitionFunction(model, train_y, k_NN=k_NN) # define our custom acquisition function               
-            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=torch.float) # define the bound for optimizing acquisition function
+            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=DTYPE) # define the bound for optimizing acquisition function
             
             # Optimize the acquisition function
-            candidate, acq_value = optimize_acqf(
+            candidate, acq_value = optimize_acqf_quiet(
                 acq_function=custom_acq_function,
                 bounds=bounds,
-                q=1,  
-                num_restarts=10,  
-                raw_samples=20,  
+                q=1,
+                seed=seed,
+                iteration=i,
+                model=model,
             )
              
             train_x = torch.cat((train_x, candidate)) # append the new query point
-            y_new = synthetic_function(lb+(ub-lb)*candidate) # new query function value
+            y_new = synthetic_function(lb+(ub-lb)*candidate).to(dtype=DTYPE) # new query function value
             train_y = torch.cat((train_y, y_new)) # append the new query function value
                        
             coverage = reachability(train_y, n_bins, obj_lb, obj_ub) # calculate the new reachability
@@ -147,4 +157,9 @@ if __name__ == '__main__':
                        
         coverage_tensor.append(coverage_list)
 
-    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)
+
+    output_dir = GENERATED_RESULTS_DIR / "continuous" / "multi-outcome" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(coverage_tensor, output_dir / "coverage.pt")
+    print(f"Saved generated results to {output_dir}")

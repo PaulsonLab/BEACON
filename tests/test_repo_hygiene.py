@@ -34,11 +34,14 @@ def test_python_files_parse():
 
 def test_beacon_package_imports():
     paths = importlib.import_module("beacon.paths")
+    optimization = importlib.import_module("beacon.optimization")
     importlib.import_module("beacon.thompson_sampling")
 
     assert paths.REPO_ROOT == REPO_ROOT
     assert paths.PLOT_DATA_DIR == REPO_ROOT / "results" / "plot-data"
+    assert paths.GENERATED_RESULTS_DIR == REPO_ROOT / "results" / "generated"
     assert paths.FIGURE_OUTPUTS_DIR == REPO_ROOT / "figures" / "output"
+    assert optimization.DTYPE.__str__() == "torch.float64"
 
 
 def test_expected_layout_exists():
@@ -148,9 +151,91 @@ def test_plotting_scripts_save_to_figure_outputs_dir():
     offenders = []
 
     for path in sorted((REPO_ROOT / "figures" / "scripts").glob("*.py")):
-        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            if ".savefig(" in line and "FIGURE_OUTPUTS_DIR" not in line:
-                offenders.append(f"{path.relative_to(REPO_ROOT)}:{line_number}")
+        source = path.read_text(encoding="utf-8")
+        lines = source.splitlines()
+        tree = ast.parse(source, filename=str(path))
+        savefig_calls = []
+        show_calls = []
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+                continue
+            if node.func.attr == "savefig":
+                savefig_calls.append(node)
+            elif node.func.attr == "show":
+                show_calls.append(node)
+
+        if not savefig_calls:
+            offenders.append(f"{path.relative_to(REPO_ROOT)} has no active savefig call")
+
+        for call in savefig_calls:
+            line = lines[call.lineno - 1]
+            if "FIGURE_OUTPUTS_DIR" not in line:
+                offenders.append(f"{path.relative_to(REPO_ROOT)}:{call.lineno}")
+
+        for call in show_calls:
+            offenders.append(f"{path.relative_to(REPO_ROOT)}:{call.lineno} has active show call")
+
+    assert offenders == []
+
+
+def test_experiment_scripts_save_to_generated_results_dir():
+    helper_modules = {
+        Path("experiments/discrete/multi-outcome/oil_sorbent.py"),
+    }
+    offenders = []
+
+    for path in sorted((REPO_ROOT / "experiments").rglob("*.py")):
+        rel_path = path.relative_to(REPO_ROOT)
+        if rel_path in helper_modules:
+            continue
+
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        save_calls = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "save"
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "torch"
+        ]
+
+        if not save_calls:
+            offenders.append(f"{rel_path} has no active torch.save call")
+            continue
+        if "GENERATED_RESULTS_DIR" not in source:
+            offenders.append(f"{rel_path} does not import GENERATED_RESULTS_DIR")
+        if "output_dir = GENERATED_RESULTS_DIR" not in source:
+            offenders.append(f"{rel_path} does not build output_dir from GENERATED_RESULTS_DIR")
+
+        for call in save_calls:
+            if len(call.args) < 2:
+                offenders.append(f"{rel_path}:{call.lineno} torch.save has no destination")
+                continue
+            destination = call.args[1]
+            if isinstance(destination, ast.Constant) and isinstance(destination.value, str):
+                offenders.append(f"{rel_path}:{call.lineno} saves to a bare string path")
+
+    assert offenders == []
+
+
+def test_continuous_scripts_use_quiet_acquisition_optimizer():
+    offenders = []
+
+    for path in sorted((REPO_ROOT / "experiments" / "continuous").rglob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Name) and func.id == "optimize_acqf":
+                offenders.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}")
+            elif isinstance(func, ast.Attribute) and func.attr == "optimize_acqf":
+                offenders.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}")
 
     assert offenders == []
 

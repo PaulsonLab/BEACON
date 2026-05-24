@@ -13,7 +13,7 @@ from scipy.io import loadmat
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import PLOT_DATA_DIR
+from beacon.paths import FIGURE_OUTPUTS_DIR, PLOT_DATA_DIR
 
 text_size = 16
 marker_size = 14
@@ -149,7 +149,7 @@ for i, ax in enumerate(axes.flat):
         df_melted = df.melt(var_name='Tensor', value_name='Value')
         
         # Create the violin plot with the same colors
-        sns.violinplot(x='Tensor', y='Value', data=df_melted, palette=palette, width=0.4, inner='point',cut=0)
+        sns.violinplot(x='Tensor', y='Value', hue='Tensor', data=df_melted, palette=palette, width=0.4, inner='point', cut=0, legend=False)
         sns.stripplot(x='Tensor', y='Value', data=df_melted, jitter=True, size=4, color='k', alpha=0.6)
         ax.set_ylabel('Number of final behaviors', fontsize=text_size)
         ax.set_xlabel('')
@@ -173,3 +173,5 @@ for i, ax in enumerate(axes.flat):
         # plt.show()
 
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.08, wspace=0.2, hspace=0.1)    
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / "MNIST.png", dpi=300, bbox_inches="tight")

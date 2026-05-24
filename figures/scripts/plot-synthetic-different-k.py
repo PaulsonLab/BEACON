@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
+from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR, FIGURE_OUTPUTS_DIR
 
 synthetic = '12DAckley'
 bins = 1
@@ -88,3 +88,5 @@ ax.spines['left'].set_linewidth(2)
 ax.spines['right'].set_linewidth(2)
 plt.ylim(0,1)
 plt.grid(alpha=0.5, linewidth=2.0)
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / "Synthetic_Different_k.png", dpi=300, bbox_inches="tight")

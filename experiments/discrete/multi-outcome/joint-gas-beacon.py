@@ -3,6 +3,7 @@
 """Run the joint gas uptake discrete multi-outcome BEACON study.
 
 Inputs: PMOF20K_traindata_7000_train.csv in data/materials.
+Outputs: cost.pt and coverage.pt in results/generated/discrete/multi-outcome/joint-gas-beacon.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import sys
@@ -33,7 +34,7 @@ from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from beacon.thompson_sampling import EfficientThompsonSampler
 import pandas as pd
 import os
-from beacon.paths import MATERIALS_DIR
+from beacon.paths import GENERATED_RESULTS_DIR, MATERIALS_DIR
 
 def reachability_uniformity(behavior, n_bins = 25, mins = None, maxs=None, num_filled_grids = 100):
     
@@ -218,7 +219,10 @@ if __name__ == '__main__':
       
     
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
-    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
-   
-    # torch.save(cost_tensor, 'MOF_TS_1_cost_list_NS.pt')  
-    # torch.save(coverage_tensor, 'MOF_TS_1_coverage_list_NS.pt')  
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)
+
+    output_dir = GENERATED_RESULTS_DIR / "discrete" / "multi-outcome" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(cost_tensor, output_dir / "cost.pt")
+    torch.save(coverage_tensor, output_dir / "coverage.pt")
+    print(f"Saved generated results to {output_dir}")

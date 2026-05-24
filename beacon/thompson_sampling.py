@@ -29,9 +29,11 @@ class EfficientThompsonSampler():
         if type(self.model.train_x) == torch.Tensor:
             self.train_x = self.model.train_x
         else:
-            self.train_x = torch.tensor(self.model.train_x)
-        self.x_dim = torch.tensor(self.train_x.shape[1])
-        self.train_y = self.model.train_y
+            self.train_x = torch.as_tensor(self.model.train_x)
+        self.dtype = self.train_x.dtype
+        self.device = self.train_x.device
+        self.x_dim = self.train_x.shape[1]
+        self.train_y = self.model.train_y.to(dtype=self.dtype, device=self.device)
         self.num_of_train_inputs = self.model.train_x.shape[0]
         # scaled outputs
         self.scaled_train_y = self.model.outcome_transform(self.train_y)[0]
@@ -43,30 +45,39 @@ class EfficientThompsonSampler():
         self.learning_rate = 0.01
         self.num_of_epochs = 10 * self.x_dim
         # obtain the kernel parameters
-        self.sigma = self.model.likelihood.noise[0].item() # assumes fixed noise value
-        self.lengthscale = self.model.covar_module.base_kernel.lengthscale.detach().float()
-        self.outputscale = self.model.covar_module.outputscale.item()
+        self.sigma = self.model.likelihood.noise.detach().to(dtype=self.dtype, device=self.device).reshape(-1)[0]
+        self.lengthscale = self.model.covar_module.base_kernel.lengthscale.detach().to(dtype=self.dtype, device=self.device)
+        self.outputscale = self.model.covar_module.outputscale.detach().to(dtype=self.dtype, device=self.device)
         # obtain the kernel
         self.kernel = self.model.covar_module
         # define the Knn matrix
         with torch.no_grad():
             self.Knn = self.kernel(self.train_x)
-            self.Knn = self.Knn.evaluate()
+            self.Knn = self.Knn.to_dense()
             # precalculate matrix inverse
-            self.inv_mat = torch.inverse(self.Knn + self.sigma * torch.eye(self.num_of_train_inputs))
+            eye = torch.eye(self.num_of_train_inputs, dtype=self.dtype, device=self.device)
+            self.inv_mat = torch.inverse(self.Knn + self.sigma * eye)
 
         self.create_fourier_bases()
         self.calculate_phi()
 
     def create_fourier_bases(self):
         # sample thetas
-        self.thetas = torch.randn(size = (self.num_of_bases, self.x_dim)) / self.lengthscale
+        self.thetas = torch.randn(
+            size=(self.num_of_bases, self.x_dim),
+            dtype=self.dtype,
+            device=self.device,
+        ) / self.lengthscale
         # sample biases
-        self.biases = torch.rand(self.num_of_bases) * 2 * pi
+        self.biases = torch.rand(self.num_of_bases, dtype=self.dtype, device=self.device) * 2 * pi
 
     def create_sample(self):
         # sample weights
-        self.weights = torch.randn(size = (self.num_of_samples, self.num_of_bases)).float()
+        self.weights = torch.randn(
+            size=(self.num_of_samples, self.num_of_bases),
+            dtype=self.dtype,
+            device=self.device,
+        )
 
     def calculate_phi(self):
         '''
@@ -80,7 +91,7 @@ class EfficientThompsonSampler():
         # add biases and take cosine to obtain fourier representations
         ft = torch.cos(dot + self.biases.unsqueeze(0))
         # finally, multiply by corresponding constants (see paper)
-        self.Phi = (self.outputscale * np.sqrt(2 / self.num_of_bases) * ft).float()
+        self.Phi = self.outputscale * np.sqrt(2 / self.num_of_bases) * ft
 
     def calculate_V(self):
         '''
@@ -91,7 +102,7 @@ class EfficientThompsonSampler():
         # PhiW: num_of_train x num_of_samples
         PhiW = torch.matmul(self.Phi, self.weights.T)
         # add noise (see paper)
-        PhiW = PhiW + torch.randn(size = PhiW.shape) * self.sigma
+        PhiW = PhiW + torch.randn(size=PhiW.shape, dtype=self.dtype, device=self.device) * self.sigma
         # subtract from training outputs
         mat1 = self.scaled_train_y - PhiW
         # calculate V matrix by premultiplication by inv_mat = (K_nn + I_n*sigma)^{-1}
@@ -114,7 +125,9 @@ class EfficientThompsonSampler():
         Create a sample form the prior, evaluate it at x
         '''
         if type(x) is not torch.Tensor:
-            x = torch.tensor(x)
+            x = torch.as_tensor(x, dtype=self.dtype, device=self.device)
+        else:
+            x = x.to(dtype=self.dtype, device=self.device)
         # calculate the fourier features evaluated at the query points
         out1 = self.calculate_fourier_features(x)
         # extend the weights so that we can use element wise multiplication
@@ -127,7 +140,9 @@ class EfficientThompsonSampler():
         Calculate the posterior update at a location x
         '''
         if type(x) is not torch.Tensor:
-            x = torch.tensor(x)
+            x = torch.as_tensor(x, dtype=self.dtype, device=self.device)
+        else:
+            x = x.to(dtype=self.dtype, device=self.device)
         # x: num_of_multistarts x num_of_samples x dim
         # self.calculate_V() # can probably pre-calculate this
         # train x: num_of_multistarts x num_of_train x dim
@@ -135,7 +150,7 @@ class EfficientThompsonSampler():
         # z: num_of_multistarts x num_of_train x num_of_samples
         # z: kernel evaluation between new query points and training set
         z = self.kernel(train_x, x)
-        z = z.evaluate()
+        z = z.to_dense()
         # we now repeat V the number of times necessary so that we can use element-wise multiplication
         V = self.V.repeat(self.num_of_multistarts, 1, 1)
         out = z * V
@@ -155,9 +170,18 @@ class EfficientThompsonSampler():
         Generate the Thompson Samples, this function optimizes the samples.
         '''
         # we are always working on [0, 1]^d
-        bounds = torch.stack([torch.zeros(self.x_dim), torch.ones(self.x_dim)])
+        bounds = torch.stack([
+            torch.zeros(self.x_dim, dtype=self.dtype, device=self.device),
+            torch.ones(self.x_dim, dtype=self.dtype, device=self.device),
+        ])
         # initialise randomly - there is definitely much better ways of doing this
-        X = torch.rand(self.num_of_multistarts, self.num_of_samples, self.x_dim)
+        X = torch.rand(
+            self.num_of_multistarts,
+            self.num_of_samples,
+            self.x_dim,
+            dtype=self.dtype,
+            device=self.device,
+        )
         X.requires_grad = True
         # define optimiser
         optimiser = torch.optim.Adam([X], lr = self.learning_rate)

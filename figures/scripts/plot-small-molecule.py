@@ -10,7 +10,7 @@ from scipy.io import loadmat
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import PLOT_DATA_DIR
+from beacon.paths import FIGURE_OUTPUTS_DIR, PLOT_DATA_DIR
 
 synthetic = ['H2','N2uptake', 'MOF']
 synthetic_name = ['Water solubility','ESOL', 'LogD']
@@ -100,5 +100,5 @@ for i, ax in enumerate(axes.flat):
   
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
 
-
-
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / "SmallMolecule.png", dpi=300, bbox_inches="tight")

@@ -3,6 +3,7 @@
 """Run the LogD SAAS discrete single-outcome BEACON study.
 
 Inputs: descriptor and LogD CSV files in data/materials.
+Outputs: cost.pt and coverage.pt in results/generated/discrete/single-outcome-material/logd-beacon-saas.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 
@@ -37,7 +38,7 @@ from botorch import fit_fully_bayesian_model_nuts
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import MATERIALS_DIR
+from beacon.paths import GENERATED_RESULTS_DIR, MATERIALS_DIR
 
 
 def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist = 25):
@@ -194,10 +195,10 @@ if __name__ == '__main__':
        
     
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
-    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
-   
-    # torch.save(coverage_tensor, 'logD_coverage_list_NS_SAAS.pt')
-    # torch.save(cost_tensor, 'logD_cost_list_NS_SAAS.pt')  
-    
-    
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)
 
+    output_dir = GENERATED_RESULTS_DIR / "discrete" / "single-outcome-material" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(cost_tensor, output_dir / "cost.pt")
+    torch.save(coverage_tensor, output_dir / "coverage.pt")
+    print(f"Saved generated results to {output_dir}")

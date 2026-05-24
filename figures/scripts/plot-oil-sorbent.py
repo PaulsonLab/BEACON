@@ -12,7 +12,7 @@ import torch
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import PLOT_DATA_DIR
+from beacon.paths import FIGURE_OUTPUTS_DIR, PLOT_DATA_DIR
 
 save_path = PLOT_DATA_DIR / "OilSorbent.mat"
 loaded_data = loadmat(save_path)
@@ -101,3 +101,6 @@ axes[1].legend(prop={'weight':'normal','size':'medium'}, loc='best')
 # Adjust layout and display
 # plt.tight_layout()
 # plt.show()
+
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / "OilSorbent.png", dpi=300, bbox_inches="tight")

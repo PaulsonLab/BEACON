@@ -100,4 +100,4 @@ plt.subplots_adjust(bottom=0.15)
 
 FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 plt.savefig(FIGURE_OUTPUTS_DIR / 'NoisyAckley_2x2.png', dpi=300, bbox_inches='tight')
-plt.show()
+# plt.show()

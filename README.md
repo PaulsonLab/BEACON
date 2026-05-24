@@ -17,6 +17,7 @@ BEACON uses Bayesian optimization ideas to search for novel behaviors in expensi
 | `data/materials/` | Tracked tabular and pickle inputs used by material-discovery scripts. |
 | `results/continuous-single-outcome/` | Tracked saved tensor outputs for continuous single-outcome plots. |
 | `results/plot-data/` | Saved `.mat` files and image assets that plotting scripts read. |
+| `results/generated/` | Local tensor outputs written by experiment scripts. Ignored by git. |
 | `models/mnist/` | Tracked CNN/VAE weights used by the MNIST script. |
 | `tests/` | Lightweight repository checks; these do not run full experiments. |
 
@@ -53,7 +54,7 @@ python experiments/discrete/single-outcome-material/logd-beacon.py
 python figures/scripts/plot-synthetic.py
 ```
 
-The optimization scripts are intended to reproduce paper experiments and may take a long time. Most `torch.save(...)` calls are left commented so the checked-in result artifacts are not overwritten accidentally. Uncomment or redirect saves only when regenerating results intentionally.
+The optimization scripts are intended to reproduce paper experiments and may take a long time. When an experiment finishes, it writes generated tensors to `results/generated/<domain>/<task>/<script-name>/`.
 
 Plotting scripts read from `results/continuous-single-outcome/` or `results/plot-data/` and write generated figures into `figures/output/`.
 
@@ -64,7 +65,7 @@ Plotting scripts read from `results/continuous-single-outcome/` or `results/plot
 `beacon/paths.py` defines repo-root-relative paths used by scripts:
 
 ```python
-from beacon.paths import MATERIALS_DIR, PLOT_DATA_DIR, FIGURE_OUTPUTS_DIR
+from beacon.paths import MATERIALS_DIR, PLOT_DATA_DIR, GENERATED_RESULTS_DIR, FIGURE_OUTPUTS_DIR
 ```
 
 ## Checks

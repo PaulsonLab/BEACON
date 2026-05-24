@@ -3,6 +3,7 @@
 """Run the water solubility discrete single-outcome BEACON study.
 
 Inputs: water_set_wide_descriptors.csv in data/materials.
+Outputs: cost.pt and coverage.pt in results/generated/discrete/single-outcome-material/water-solubility-beacon.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import sys
@@ -33,7 +34,7 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import MATERIALS_DIR
+from beacon.paths import GENERATED_RESULTS_DIR, MATERIALS_DIR
 
 
 
@@ -163,10 +164,10 @@ if __name__ == '__main__':
         coverage_tensor.append(coverage_list)
            
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
-    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32) 
-    # torch.save(coverage_tensor, 'N2uptake_TS_1_coverage_list_NS.pt')
-    # torch.save(cost_tensor, 'N2uptake_TS_1_cost_list_NS.pt')  
-    
-    
-    
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)
 
+    output_dir = GENERATED_RESULTS_DIR / "discrete" / "single-outcome-material" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(cost_tensor, output_dir / "cost.pt")
+    torch.save(coverage_tensor, output_dir / "coverage.pt")
+    print(f"Saved generated results to {output_dir}")

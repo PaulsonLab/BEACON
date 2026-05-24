@@ -3,6 +3,7 @@
 """Run the Styblinski-Tang continuous single-outcome BEACON study.
 
 Inputs: synthetic Styblinski-Tang function from BoTorch.
+Outputs: cost.pt and coverage.pt in results/generated/continuous/single-outcome/styblinski-tang-beacon.
 Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import sys
@@ -18,13 +19,11 @@ from gpytorch.kernels import MaternKernel, RFFKernel, ScaleKernel
 from gpytorch.likelihoods import GaussianLikelihood
 from gpytorch.mlls import ExactMarginalLogLikelihood
 from torch.quasirandom import SobolEngine
-from botorch.fit import fit_gpytorch_mll
 from botorch.utils import standardize
 import botorch
 from typing import Tuple
 from botorch.utils.transforms import t_batch_mode_transform
 from botorch.acquisition import AcquisitionFunction, AnalyticAcquisitionFunction
-from botorch.optim import optimize_acqf
 from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
@@ -32,11 +31,13 @@ from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
 from gpytorch.kernels import RBFKernel, ScaleKernel
+from beacon.optimization import DTYPE, fit_gpytorch_mll_quiet, optimize_acqf_quiet
+from beacon.paths import GENERATED_RESULTS_DIR
 from beacon.thompson_sampling import EfficientThompsonSampler
 
 
 def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5):
-    behavior = behavior.squeeze(1).numpy()
+    behavior = behavior.detach().squeeze(1).cpu().numpy()
     num = len(behavior)
     cum_hist, _ = np.histogram(behavior, np.linspace(obj_lb, obj_ub, n_bins + 1))
     cum_hist = cum_hist[np.nonzero(cum_hist)] / (num) # discrete distribution
@@ -68,7 +69,14 @@ class CustomAcquisitionFunction(AnalyticAcquisitionFunction):
         dist = torch.cdist(samples, self.sampled_behavior) # Calculate Euclidean distance between TS and all sampled point
         dist, _ = torch.sort(dist, dim = 1) # sort the distance 
         n = dist.size()[1]
-        E = torch.cat((torch.ones(self.k), torch.zeros(n-self.k)), dim = 0) # find the k-nearest neighbor
+        nearest = min(self.k, n)
+        E = torch.cat(
+            (
+                torch.ones(nearest, dtype=dist.dtype, device=dist.device),
+                torch.zeros(n - nearest, dtype=dist.dtype, device=dist.device),
+            ),
+            dim=0,
+        ) # find the k-nearest neighbor
         dist = dist*E
         acquisition_values = torch.sum(dist,dim=1)
       
@@ -104,8 +112,8 @@ if __name__ == '__main__':
     
         print('seed:',seed)
         np.random.seed(seed)
-        train_x = torch.tensor(np.random.rand(N_init, dim)) # generate initial training data for GP        
-        train_y = function((lb+(ub-lb)*train_x)).unsqueeze(1)
+        train_x = torch.tensor(np.random.rand(N_init, dim), dtype=DTYPE) # generate initial training data for GP
+        train_y = function((lb+(ub-lb)*train_x)).unsqueeze(1).to(dtype=DTYPE)
     
         coverage = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub) # Calculate the initial reachability and uniformity    
         coverage_list = [coverage]    
@@ -114,11 +122,11 @@ if __name__ == '__main__':
         # Start BO loop
         for i in range(BO_iter):        
             
-            covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)) # select the RBF kernel
+            covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)).to(dtype=DTYPE) # select the RBF kernel
             model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=1), covar_module=covar_module)
             mll = ExactMarginalLogLikelihood(model.likelihood, model)
-            
-            fit_gpytorch_mll(mll)
+
+            fit_gpytorch_mll_quiet(mll, model=model, seed=seed, iteration=i)
 
             model.train_x = train_x
             model.train_y = train_y
@@ -126,18 +134,19 @@ if __name__ == '__main__':
             # Perform optimization on TS posterior sample
             custom_acq_function = CustomAcquisitionFunction(model, train_y, k=k)
             
-            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=torch.float)  # Define bounds of the feature space (always operate within [0,1]^d)
+            bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=DTYPE)  # Define bounds of the feature space (always operate within [0,1]^d)
             # Optimize the acquisition function
-            candidate, acq_value = optimize_acqf(
+            candidate, acq_value = optimize_acqf_quiet(
                 acq_function=custom_acq_function,
                 bounds=bounds,
                 q=1,  # Number of candidates to generate
-                num_restarts=10,  # Number of restarts for the optimizer
-                raw_samples=20,  # Number of initial raw samples to consider
+                seed=seed,
+                iteration=i,
+                model=model,
             )
            
             train_x = torch.cat((train_x, candidate))
-            y_new = function(lb+(ub-lb)*candidate).unsqueeze(1)
+            y_new = function(lb+(ub-lb)*candidate).unsqueeze(1).to(dtype=DTYPE)
             train_y = torch.cat((train_y, y_new))
             
             coverage = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub)
@@ -150,6 +159,10 @@ if __name__ == '__main__':
         
         
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
-    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)   
-    # torch.save(coverage_tensor, '12DStyTang_coverage_list_BEACON_k1.pt')
-    # torch.save(cost_tensor, '12DStyTang_cost_list_BEACON_k1.pt')  
+    coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)
+
+    output_dir = GENERATED_RESULTS_DIR / "continuous" / "single-outcome" / Path(__file__).stem
+    output_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(cost_tensor, output_dir / "cost.pt")
+    torch.save(coverage_tensor, output_dir / "coverage.pt")
+    print(f"Saved generated results to {output_dir}")

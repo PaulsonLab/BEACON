@@ -24,6 +24,7 @@ env/
 data/mnist/
 data/MNIST/
 experiments/discrete/multi-outcome/mnist/data/
+results/generated/
 *.log
 *.tmp
 

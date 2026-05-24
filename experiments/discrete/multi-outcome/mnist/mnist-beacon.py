@@ -3,6 +3,7 @@
 """Run the MNIST discrete multi-outcome BEACON study.
 
 Inputs: downloaded MNIST images plus trained VAE/CNN weights in models/mnist.
+Outputs: reachability.pt in results/generated/discrete/multi-outcome/mnist/mnist-beacon.
 Runtime: expensive; may download MNIST if data/mnist is not present.
 """
 import sys
@@ -33,7 +34,7 @@ import os
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import MNIST_DATA_DIR, MNIST_MODELS_DIR
+from beacon.paths import GENERATED_RESULTS_DIR, MNIST_DATA_DIR, MNIST_MODELS_DIR
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
@@ -226,4 +227,7 @@ for seed in range(replicate):
         pred_y = torch.max(test_output, 1).indices[torch.max(test_output, 1).values>=prob_cnn]
         reachability_list[seed].append(len(np.unique(pred_y)))
 
-# torch.save(reachability_list, 'MNIST_reachability_BEACON.pt')
+output_dir = GENERATED_RESULTS_DIR / "discrete" / "multi-outcome" / "mnist" / Path(__file__).stem
+output_dir.mkdir(parents=True, exist_ok=True)
+torch.save(reachability_list, output_dir / "reachability.pt")
+print(f"Saved generated results to {output_dir}")
