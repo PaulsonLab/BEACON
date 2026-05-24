@@ -1,0 +1,36 @@
+# Python caches and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Downloaded datasets and local scratch outputs
+data/MNIST/
+Discrete_MultiOutcome/MNIST/data/
+*.log
+*.tmp
+
+# Generated figures from plotting scripts
+*.png
+*.pdf
+*.svg
+*.eps
+*.tif
+*.tiff
+!results/figure_inputs/OilSorbent_distribution.png
