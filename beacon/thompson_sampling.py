@@ -102,8 +102,6 @@ class EfficientThompsonSampler():
         '''
         Calculate the Fourier Features evaluated at some input x
         '''
-        # evaluation using fourier features
-        self.posterior_update(x)
         # calculate the dot product between the frequencies, theta, and the new query points
         dot = x.matmul(self.thetas.T)
         # calculate the fourier frequency by adding bias and cosine
