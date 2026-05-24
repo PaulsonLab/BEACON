@@ -23,15 +23,16 @@ env/
 # Downloaded datasets and local scratch outputs
 data/mnist/
 data/MNIST/
-Discrete_MultiOutcome/MNIST/data/
+experiments/discrete/multi-outcome/mnist/data/
 *.log
 *.tmp
 
 # Generated figures from plotting scripts
+figures/output/
 *.png
 *.pdf
 *.svg
 *.eps
 *.tif
 *.tiff
-!results/figure_inputs/OilSorbent_distribution.png
+!results/plot-data/OilSorbent_distribution.png
