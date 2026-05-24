@@ -38,6 +38,7 @@ def test_beacon_package_imports():
 
     assert paths.REPO_ROOT == REPO_ROOT
     assert paths.PLOT_DATA_DIR == REPO_ROOT / "results" / "plot-data"
+    assert paths.FIGURE_OUTPUTS_DIR == REPO_ROOT / "figures" / "output"
 
 
 def test_expected_layout_exists():
@@ -139,6 +140,17 @@ def test_public_script_names_are_lowercase_dash():
                 if not PUBLIC_NAME.fullmatch(part):
                     offenders.append(str(rel_path))
                     break
+
+    assert offenders == []
+
+
+def test_plotting_scripts_save_to_figure_outputs_dir():
+    offenders = []
+
+    for path in sorted((REPO_ROOT / "figures" / "scripts").glob("*.py")):
+        for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            if ".savefig(" in line and "FIGURE_OUTPUTS_DIR" not in line:
+                offenders.append(f"{path.relative_to(REPO_ROOT)}:{line_number}")
 
     assert offenders == []
 

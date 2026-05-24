@@ -10,7 +10,7 @@ from scipy.io import loadmat
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import PLOT_DATA_DIR
+from beacon.paths import FIGURE_OUTPUTS_DIR, PLOT_DATA_DIR
 
 synthetic = ['H2','N2uptake', 'MOF']
 synthetic_name = ['Hydrogen uptake capacity','Nitrogen uptake capacity', 'Joint gas uptake capacity']
@@ -105,6 +105,6 @@ plt.subplots_adjust(left=0.08, right=0.99,bottom=0.22, wspace=0.25)
 # plt.subplots_adjust(bottom=0.18, wspace=0.25)
   
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
-plt.savefig('MOF.png',dpi=300)
-
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / 'MOF.png', dpi=300)
 

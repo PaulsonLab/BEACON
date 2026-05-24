@@ -12,7 +12,7 @@ from scipy.io import loadmat
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import PLOT_DATA_DIR
+from beacon.paths import FIGURE_OUTPUTS_DIR, PLOT_DATA_DIR
 
 # Define your synthetic function and generate data
 def synthetic_function(x):
@@ -154,7 +154,7 @@ ax2.grid(alpha=0.5, linewidth=2.0)
 ax2.tick_params(axis="both", labelsize=text_size)
 
 # plt.tight_layout()
-plt.savefig('Synthetic_Multioutcome.png',dpi=300)
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / 'Synthetic_Multioutcome.png', dpi=300)
 
         
-

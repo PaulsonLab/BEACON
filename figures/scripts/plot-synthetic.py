@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
+from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR, FIGURE_OUTPUTS_DIR
 
 synthetic = ['4DAckley','4DRosen','4DStyTang','8DAckley','8DRosen','8DStyTang','12DAckley','12DRosen','12DStyTang']
 synthetic_name = ['Ackley 4D','Rosenbrock 4D','Styblinski-Tang 4D','Ackley 8D','Rosenbrock 8D','Styblinski-Tang 8D','Ackley 12D','Rosenbrock 12D','Styblinski-Tang 12D']
@@ -153,6 +153,6 @@ plt.subplots_adjust(
 )    
 fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02, wspace=0.02, hspace=0.02)
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
-plt.savefig('SYNTHETIC.png', dpi=300)
-
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / 'SYNTHETIC.png', dpi=300)
 

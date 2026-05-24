@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
+from beacon.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR, FIGURE_OUTPUTS_DIR
 
 noises = [0.5, 1.0, 2.0, 4.0]
 
@@ -98,5 +98,6 @@ fig.legend(
 plt.tight_layout()
 plt.subplots_adjust(bottom=0.15)
 
-plt.savefig('NoisyAckley_2x2.png', dpi=300, bbox_inches='tight')
+FIGURE_OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+plt.savefig(FIGURE_OUTPUTS_DIR / 'NoisyAckley_2x2.png', dpi=300, bbox_inches='tight')
 plt.show()

@@ -55,7 +55,7 @@ python figures/scripts/plot-synthetic.py
 
 The optimization scripts are intended to reproduce paper experiments and may take a long time. Most `torch.save(...)` calls are left commented so the checked-in result artifacts are not overwritten accidentally. Uncomment or redirect saves only when regenerating results intentionally.
 
-Plotting scripts read from `results/continuous-single-outcome/` or `results/plot-data/` and write figures into the current working directory unless the script is adjusted locally.
+Plotting scripts read from `results/continuous-single-outcome/` or `results/plot-data/` and write generated figures into `figures/output/`.
 
 ## Shared Code
 
@@ -64,7 +64,7 @@ Plotting scripts read from `results/continuous-single-outcome/` or `results/plot
 `beacon/paths.py` defines repo-root-relative paths used by scripts:
 
 ```python
-from beacon.paths import MATERIALS_DIR, PLOT_DATA_DIR
+from beacon.paths import MATERIALS_DIR, PLOT_DATA_DIR, FIGURE_OUTPUTS_DIR
 ```
 
 ## Checks
