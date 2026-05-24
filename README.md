@@ -15,3 +15,15 @@ Noted that BEACON requires the usage of [ThompsonSampling.py](https://github.com
 # Extension to high-dimensional problem
 We propose an extension algorithm TR-BEACON for addressing high-dimensional novelty search problem.
 Please refer to the [paper](https://openreview.net/pdf?id=9Xo6ONB8E3) and [github repo](https://github.com/PaulsonLab/TR-BEACON).
+
+## Citation
+If you use this code in your research, please cite the following paper:
+
+```
+@article{tang2024beacon,
+  title={Beacon: A bayesian optimization strategy for novelty search in expensive black-box systems},
+  author={Tang, Wei-Ting and Chakrabarty, Ankush and Paulson, Joel A},
+  journal={arXiv preprint arXiv:2406.03616},
+  year={2024}
+}
+```
