@@ -8,7 +8,7 @@ pip install -r requirements.txt
 ```
 
 # Usage
-We provide the code scripts for executing BEACON and other baseline methods on different problem setting. Noted that BEACON requires the usage of [ThompsonSampling.py](https://github.com/PaulsonLab/BEACON/blob/main/src/ThompsonSampling.py) file to perform efficient Thompson sampling strategy proposed in [this work](https://arxiv.org/abs/2002.09309).
+We provide the code scripts for executing BEACON on different problem setting. Noted that BEACON requires the usage of [ThompsonSampling.py](https://github.com/PaulsonLab/BEACON/blob/main/src/ThompsonSampling.py) file to perform efficient Thompson sampling strategy proposed in [this work](https://arxiv.org/abs/2002.09309).
 
 # Extension to high-dimensional problem
 We propose an extension algorithm TR-BEACON for addressing high-dimensional novelty search problem.
