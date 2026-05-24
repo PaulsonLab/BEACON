@@ -12,7 +12,7 @@ from scipy.io import loadmat
 synthetic = ['H2','N2uptake', 'MOF']
 synthetic_name = ['Water solubility','ESOL', 'LogD']
 
-text_size = 14
+text_size = 16
 marker_size = 8
 linewidth=4
 
@@ -93,7 +93,8 @@ for i, ax in enumerate(axes.flat):
     ax.legend(loc='lower right', fontsize=text_size)  # Add the legend with custom position and size
    
     ax.set_xlabel('Number of evaluations', fontsize=text_size)
-        
+    ax.tick_params(axis="both", labelsize=text_size)
+  
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
 
 

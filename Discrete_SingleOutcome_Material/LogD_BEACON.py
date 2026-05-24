@@ -25,9 +25,7 @@ import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.models.transforms.outcome import Standardize
 import pandas as pd
-
-
-
+import os
 
 def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist = 25):
     behavior = behavior.squeeze(1).numpy()
@@ -67,6 +65,8 @@ class CustomAcquisitionFunction():
         return acquisition_values.flatten()
     
 if __name__ == '__main__':
+    path = os.getcwd()
+    base_path = path.split("BEACON")[0]
     
     dim = 125
     N_init = 10
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # Data pre-processing
     #####################################################################################################################################################
     # path = os.getcwd()
-    data_path = "/fs/ess/PAS2983/jontwt/BEACON/Material Data/extract_data_logD.csv"
+    data_path = base_path+"BEACON/Material Data/extract_data_logD.csv"
     col_list=['LogD','Exp_RT']
     lc_df = pd.read_csv(data_path,usecols=col_list)
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     # Import descriptor file
     # path = os.getcwd()
-    data_path = "/fs/ess/PAS2983/jontwt/BEACON/Material Data/descriptors_logD.csv"
+    data_path = base_path+"BEACON/Material Data/descriptors_logD.csv"
     des_df = pd.read_csv(data_path,index_col=0)
 
     # Remove non_retained molecules

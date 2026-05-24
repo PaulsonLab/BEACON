@@ -28,7 +28,7 @@ from botorch.models.transforms.outcome import Standardize
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from src.ThompsonSampling import EfficientThompsonSampler
 import pandas as pd
-
+import os
 def reachability_uniformity(behavior, n_bins = 25, mins = None, maxs=None, num_filled_grids = 100):
     
     filled_grids = set()
@@ -81,7 +81,8 @@ class CustomAcquisitionFunction(AcquisitionFunction):
 
 
 if __name__ == '__main__':
-    
+    path = os.getcwd()
+    base_path = path.split("BEACON")[0]
     # Case study 1
     dim = 25
     feat = set(
@@ -109,7 +110,7 @@ if __name__ == '__main__':
       'total_POV_gravimetric'
     ])
 
-    file_path1 = '/fs/ess/PAS2983/jontwt/BEACON/Material Data/PMOF20K_traindata_7000_train.csv'
+    file_path1 = base_path+'BEACON/Material Data/PMOF20K_traindata_7000_train.csv'
     data1 = pd.read_csv(file_path1)
     y1 = data1['pure_uptake_CO2_298.00_15000']
     y2 = data1['pure_uptake_methane_298.00_580000']

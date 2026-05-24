@@ -77,30 +77,21 @@ if __name__ == '__main__':
     lb = -5 # lower bound for feature
     ub = 5 # upper bound for feature
     dim = 12 # feature dimension
-    N_init = 50 # number of initial training data
-    replicate = 10 # number of replicates for experiment
+    N_init = 10 # number of initial training data
+    replicate = 1 # number of replicates for experiment
     BO_iter = 200 # number of evaluations
     n_bins = 25 # grid number for calculating reachability
-    k = 1 # k-nearest neighbor
+    k = 10 # k-nearest neighbor
     
     # Specify the minimum/maximum value for each synthetic function as to calculate reachability
-    # obj_lb = 0 # minimum obj value for Rosenbrock
+    obj_lb = 0 # minimum obj value for Rosenbrock
     # obj_ub = 270108 # obj maximum for 4D Rosenbrock
     # obj_ub = 630252.63 # obj maximum for 8D Rosenbrock
-    # obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
+    obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
     
-    # obj_lb = 0 # minimum obj value for Ackley
-    # obj_ub = 14.3027 # maximum obj value for Ackley
-    
-    obj_lb = -39.16599*dim # minimum obj val for SkyTang
-    # obj_ub = 500 # maximum obj val for 4D SkyTang
-    # obj_ub = 1000 # maximum obj val for 8D SkyTang
-    obj_ub = 1500 # maximum obj for 12D SkyTang
-   
     # Specify the synthetic function we want to study
-    # function = Rosenbrock(dim=dim)
-    # function = Ackley(dim=dim)
-    function = StyblinskiTang(dim=dim)
+    function = Rosenbrock(dim=dim)
+
     
     cost_tensor = []
     coverage_tensor = [] # list containing reachability for every itertation
@@ -157,5 +148,4 @@ if __name__ == '__main__':
         
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)   
-    torch.save(coverage_tensor, '12DStyTang_coverage_list_BEACON_k1.pt')
-    torch.save(cost_tensor, '12DStyTang_cost_list_BEACON_k1.pt')  
+    

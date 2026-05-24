@@ -25,6 +25,8 @@ from scipy.spatial.distance import cdist, jensenshannon
 import numpy as np
 from torch.quasirandom import SobolEngine
 from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
+# import torchsort
+import pickle
 from botorch.models.transforms.outcome import Standardize
 import matplotlib.pyplot as plt
 from gpytorch.kernels import RBFKernel, ScaleKernel
@@ -60,6 +62,7 @@ class CustomAcquisitionFunction(AnalyticAcquisitionFunction):
     def forward(self, X):
         """Compute the acquisition function value at X."""
         
+        # We can sample using efficient Thompson sampling 
         samples = self.ts_sampler.query_sample(X) # Thompson sampling
         dist = torch.cdist(samples, self.sampled_behavior) # Calculate Euclidean distance between TS and all sampled point
         dist, _ = torch.sort(dist, dim = 1) # sort the distance 
@@ -76,41 +79,32 @@ if __name__ == '__main__':
     
     lb = -5 # lower bound for feature
     ub = 5 # upper bound for feature
-    dim = 12 # feature dimension
+    dim = 4 # feature dimension
     N_init = 50 # number of initial training data
-    replicate = 10 # number of replicates for experiment
-    BO_iter = 200 # number of evaluations
-    n_bins = 25 # grid number for calculating reachability
-    k = 1 # k-nearest neighbor
+    replicate = 1 # number of replicates for experiment
+    BO_iter = 300 # number of evaluations
+    n_bins = 50 # grid number for calculating reachability
+    TS = 1 # number of TS (posterior sample)
+    k = 10 # k-nearest neighbor
+    Consider_noise = True # Set to True if you want BEACON to consider noise
+    noise_std = 0.5
     
     # Specify the minimum/maximum value for each synthetic function as to calculate reachability
-    # obj_lb = 0 # minimum obj value for Rosenbrock
-    # obj_ub = 270108 # obj maximum for 4D Rosenbrock
-    # obj_ub = 630252.63 # obj maximum for 8D Rosenbrock
-    # obj_ub = 990396.990397 # obj maximum for 12D Rosenbrock
+    obj_lb = 0 # minimum obj value for Ackley
+    obj_ub = 14.3027 # maximum obj value for Ackley
     
-    # obj_lb = 0 # minimum obj value for Ackley
-    # obj_ub = 14.3027 # maximum obj value for Ackley
-    
-    obj_lb = -39.16599*dim # minimum obj val for SkyTang
-    # obj_ub = 500 # maximum obj val for 4D SkyTang
-    # obj_ub = 1000 # maximum obj val for 8D SkyTang
-    obj_ub = 1500 # maximum obj for 12D SkyTang
    
     # Specify the synthetic function we want to study
-    # function = Rosenbrock(dim=dim)
-    # function = Ackley(dim=dim)
-    function = StyblinskiTang(dim=dim)
+    noise_function = Ackley(dim=dim, noise_std=noise_std) # consider noise function
+    function = Ackley(dim=dim)
     
     cost_tensor = []
     coverage_tensor = [] # list containing reachability for every itertation
-    time_tensor = [] # list containing CPU time requirement per iteration
-    
+   
     for seed in range(replicate): 
-    
-        print('seed:',seed)
         np.random.seed(seed)
-        train_x = torch.tensor(np.random.rand(N_init, dim)) # generate initial training data for GP        
+        train_x = torch.tensor(np.random.rand(N_init, dim)) # generate initial training data for GP
+        train_y_noise = noise_function((lb+(ub-lb)*train_x)).unsqueeze(1)
         train_y = function((lb+(ub-lb)*train_x)).unsqueeze(1)
     
         coverage = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub) # Calculate the initial reachability and uniformity    
@@ -118,19 +112,29 @@ if __name__ == '__main__':
         cost_list = [0] # number of sampled data excluding initial data
              
         # Start BO loop
-        for i in range(BO_iter):        
-            
+        for i in range(BO_iter):  
+            if Consider_noise:
+                likelihood = gpytorch.likelihoods.GaussianLikelihood()
+            else:
+                likelihood = gpytorch.likelihoods.GaussianLikelihood(noise_constraint=gpytorch.constraints.Interval(1e-6,1e-4))
             covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)) # select the RBF kernel
-            model = SingleTaskGP(train_x, train_y, outcome_transform=Standardize(m=1), covar_module=covar_module)
+            model = SingleTaskGP(train_x, train_y_noise, outcome_transform=Standardize(m=1), covar_module=covar_module, likelihood=likelihood)
             mll = ExactMarginalLogLikelihood(model.likelihood, model)
-            
-            fit_gpytorch_mll(mll)
-
+            try:
+                fit_gpytorch_mll(mll)
+            except:
+                print('cant fit GP')
             model.train_x = train_x
-            model.train_y = train_y
+            model.train_y = train_y_noise
             
+            # Calculate the posterior mean for sampled point
+            posterior = model.posterior(train_x)
+            posterior_mean_sample = posterior.mean
             # Perform optimization on TS posterior sample
-            custom_acq_function = CustomAcquisitionFunction(model, train_y, k=k)
+            if Consider_noise:
+                custom_acq_function = CustomAcquisitionFunction(model, posterior_mean_sample, k=k)
+            else:
+                custom_acq_function = CustomAcquisitionFunction(model, train_y_noise, k=k)
             
             bounds = torch.tensor([[0.0]*dim, [1.0]*dim], dtype=torch.float)  # Define bounds of the feature space (always operate within [0,1]^d)
             # Optimize the acquisition function
@@ -143,7 +147,9 @@ if __name__ == '__main__':
             )
            
             train_x = torch.cat((train_x, candidate))
+            y_new_noise = noise_function(lb+(ub-lb)*candidate).unsqueeze(1)
             y_new = function(lb+(ub-lb)*candidate).unsqueeze(1)
+            train_y_noise = torch.cat((train_y_noise, y_new_noise))
             train_y = torch.cat((train_y, y_new))
             
             coverage = reachability_uniformity(train_y, n_bins, obj_lb, obj_ub)
@@ -152,10 +158,9 @@ if __name__ == '__main__':
   
         cost_tensor.append(cost_list)
         coverage_tensor.append(coverage_list)
-
-        
         
     cost_tensor = torch.tensor(cost_tensor, dtype=torch.float32) 
     coverage_tensor = torch.tensor(coverage_tensor, dtype=torch.float32)   
-    torch.save(coverage_tensor, '12DStyTang_coverage_list_BEACON_k1.pt')
-    torch.save(cost_tensor, '12DStyTang_cost_list_BEACON_k1.pt')  
+    # torch.save(coverage_tensor, '4DNoisyAckley_coverage_list_BEACON_considernoiseless_0.5.pt')
+    # torch.save(cost_tensor, '4DNoisyAckley_cost_list_BEACON_considernoiseless_0.5.pt')  
+   

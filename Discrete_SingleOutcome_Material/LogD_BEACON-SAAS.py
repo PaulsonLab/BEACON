@@ -27,8 +27,6 @@ from botorch.test_functions import Rosenbrock, Ackley
 # from test_functions import push_function
 import pickle
 from botorch.models.transforms.outcome import Standardize
-
-
 import pandas as pd
 import os
 from botorch.models.fully_bayesian import SaasFullyBayesianSingleTaskGP
@@ -92,7 +90,8 @@ if __name__ == '__main__':
     # Data pre-processing
     #####################################################################################################################################################
     path = os.getcwd()
-    data_path = "/fs/ess/PAS2983/jontwt/BEACON/Material Data/extract_data_logD.csv"
+    base_path = path.split("BEACON")[0]
+    data_path = base_path+"BEACON/Material Data/extract_data_logD.csv"
     col_list=['LogD','Exp_RT']
     lc_df = pd.read_csv(data_path,usecols=col_list)
 
@@ -101,8 +100,8 @@ if __name__ == '__main__':
     lc_df.drop(lc_df[lc_df['Exp_RT'] < 180].index,inplace=True)
 
     # Import descriptor file
-    path = os.getcwd()
-    data_path = "/fs/ess/PAS2983/jontwt/BEACON/Material Data/descriptors_logD.csv"
+    
+    data_path = base_path+"BEACON/Material Data/descriptors_logD.csv"
     des_df = pd.read_csv(data_path,index_col=0)
 
     # Remove non_retained molecules
