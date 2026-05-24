@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the BEACON arXiv preprint."
+title: "BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search"
+authors:
+  - family-names: Tang
+    given-names: Wei-Ting
+  - family-names: Chakrabarty
+    given-names: Ankush
+  - family-names: Paulson
+    given-names: Joel A.
+year: 2024
+repository-code: "https://github.com/PaulsonLab/BEACON"
+url: "https://arxiv.org/abs/2406.03616"
+identifiers:
+  - type: other
+    description: arXiv
+    value: "2406.03616"

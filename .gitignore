@@ -21,6 +21,7 @@ env/
 .ruff_cache/
 
 # Downloaded datasets and local scratch outputs
+data/mnist/
 data/MNIST/
 Discrete_MultiOutcome/MNIST/data/
 *.log

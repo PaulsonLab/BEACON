@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 16 14:38:55 2024
-
-@author: tang.1856
-"""
+"""Plot small-molecule benchmark panels from saved figure inputs."""
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
 
 synthetic = ['H2','N2uptake', 'MOF']
 synthetic_name = ['Water solubility','ESOL', 'LogD']
@@ -19,7 +22,7 @@ linewidth=4
 weight='bold'
 alpha = 0.3
 
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/SmallMolecule.mat"
+save_path = FIGURE_INPUTS_DIR / "SmallMolecule.mat"
 loaded_data = loadmat(save_path)
 
 
@@ -96,7 +99,6 @@ for i, ax in enumerate(axes.flat):
     ax.tick_params(axis="both", labelsize=text_size)
   
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
-
 
 
 

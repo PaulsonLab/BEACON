@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 16 14:38:55 2024
-
-@author: tang.1856
-"""
+"""Plot the continuous synthetic benchmark figure from saved tensors."""
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
 
 synthetic = ['4DAckley','4DRosen','4DStyTang','8DAckley','8DRosen','8DStyTang','12DAckley','12DRosen','12DStyTang']
 synthetic_name = ['Ackley 4D','Rosenbrock 4D','Styblinski-Tang 4D','Ackley 8D','Rosenbrock 8D','Styblinski-Tang 8D','Ackley 12D','Rosenbrock 12D','Styblinski-Tang 12D']
@@ -22,38 +25,34 @@ alpha = 0.3
 fig, axes = plt.subplots(3, 3, figsize=(16, 14), dpi=300)  # 3 rows, 3 columns
 # Add plots and legends to subplots
 for i, ax in enumerate(axes.flat):
+    result_dir = CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR / synthetic[i]
     
-    cost_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_BEACON.pt')
-    coverage_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_BEACON.pt')
+    cost_NS_TS1 = torch.load(result_dir / f"{synthetic[i]}_cost_list_BEACON.pt")
+    coverage_NS_TS1 = torch.load(result_dir / f"{synthetic[i]}_coverage_list_BEACON.pt")
 
-    cost_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_MaxVar.pt')
-    coverage_BO = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_MaxVar.pt')
+    cost_BO = torch.load(result_dir / f"{synthetic[i]}_cost_list_MaxVar.pt")
+    coverage_BO = torch.load(result_dir / f"{synthetic[i]}_coverage_list_MaxVar.pt")
 
-    cost_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_RS.pt')
-    coverage_RS = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_RS.pt')
+    cost_RS = torch.load(result_dir / f"{synthetic[i]}_cost_list_RS.pt")
+    coverage_RS = torch.load(result_dir / f"{synthetic[i]}_coverage_list_RS.pt")
 
-    cost_NS_mean = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_mean.pt')
-    coverage_NS_mean = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_mean.pt')
+    cost_NS_mean = torch.load(result_dir / f"{synthetic[i]}_cost_list_NS_mean.pt")
+    coverage_NS_mean = torch.load(result_dir / f"{synthetic[i]}_coverage_list_NS_mean.pt")
 
-    cost_GA_NS_random = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_GA_random.pt')
-    coverage_GA_NS_random = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_GA_random.pt')
+    cost_GA_NS_random = torch.load(result_dir / f"{synthetic[i]}_cost_list_GA_random.pt")
+    coverage_GA_NS_random = torch.load(result_dir / f"{synthetic[i]}_coverage_list_GA_random.pt")
 
-    cost_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_GA_novel.pt')
-    coverage_GA_NS_novel = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_GA_novel.pt')
+    cost_GA_NS_novel = torch.load(result_dir / f"{synthetic[i]}_cost_list_GA_novel.pt")
+    coverage_GA_NS_novel = torch.load(result_dir / f"{synthetic[i]}_coverage_list_GA_novel.pt")
 
-    cost_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_GA_DEA.pt')
-    coverage_DEA = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_GA_DEA.pt')
+    cost_DEA = torch.load(result_dir / f"{synthetic[i]}_cost_list_GA_DEA.pt")
+    coverage_DEA = torch.load(result_dir / f"{synthetic[i]}_coverage_list_GA_DEA.pt")
 
-    cost_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_sobol.pt')
-    coverage_sobol = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_sobol.pt')
+    cost_sobol = torch.load(result_dir / f"{synthetic[i]}_cost_list_sobol.pt")
+    coverage_sobol = torch.load(result_dir / f"{synthetic[i]}_coverage_list_sobol.pt")
 
-    cost_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_x_space.pt')
-    coverage_NS_xspace = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_x_space.pt')
-
-    # cost_EI = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_logEI.pt')
-    # coverage_EI = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_Synthetic_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_logEI.pt')
-
-
+    cost_NS_xspace = torch.load(result_dir / f"{synthetic[i]}_cost_list_NS_x_space.pt")
+    coverage_NS_xspace = torch.load(result_dir / f"{synthetic[i]}_coverage_list_NS_x_space.pt")
 
     coverage_NS_mean_TS1 = torch.mean(coverage_NS_TS1, dim = 0)
     coverage_NS_std_TS1 = torch.std(coverage_NS_TS1, dim = 0)
@@ -155,6 +154,5 @@ plt.subplots_adjust(
 fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02, wspace=0.02, hspace=0.02)
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
 plt.savefig('SYNTHETIC.png', dpi=300)
-
 
 

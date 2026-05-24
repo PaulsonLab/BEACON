@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 16 14:38:55 2024
-
-@author: tang.1856
-"""
+"""Plot material-discovery benchmark panels from saved figure inputs."""
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
 
 synthetic = ['H2','N2uptake', 'MOF']
 synthetic_name = ['Hydrogen uptake capacity','Nitrogen uptake capacity', 'Joint gas uptake capacity']
@@ -19,7 +22,7 @@ linewidth=4
 weight='bold'
 alpha = 0.3
 
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/MOF.mat"
+save_path = FIGURE_INPUTS_DIR / "MOF.mat"
 loaded_data = loadmat(save_path)
 
 
@@ -40,10 +43,6 @@ for i, ax in enumerate(axes.flat):
 
     cost_RS = torch.tensor(loaded_data['cost_RS_'+str(i)])
     coverage_RS = torch.tensor(loaded_data['coverage_RS_'+str(i)])
-
-    # cost_NS_mean = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_cost_list_NS_mean.pt')
-    # coverage_NS_mean = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_Synthetic_Code/Results/'+synthetic[i]+'/'+synthetic[i]+'_coverage_list_NS_mean.pt')
-
 
     coverage_NS_mean_TS1 = torch.mean(coverage_NS_TS1, dim = 0)
     coverage_NS_std_TS1 = torch.std(coverage_NS_TS1, dim = 0)
@@ -107,6 +106,5 @@ plt.subplots_adjust(left=0.08, right=0.99,bottom=0.22, wspace=0.25)
   
 # plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.2)        
 plt.savefig('MOF.png',dpi=300)
-
 
 

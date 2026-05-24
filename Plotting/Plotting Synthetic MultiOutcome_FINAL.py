@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon May  6 16:43:21 2024
+"""Plot the synthetic continuous multi-outcome figure from saved inputs."""
 
-@author: tang.1856
-"""
-
+import sys
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
 from scipy.io import loadmat
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
 
 # Define your synthetic function and generate data
 def synthetic_function(x):
@@ -65,14 +68,12 @@ ax.tick_params(axis="both", labelsize=text_size)
 
 # second figure
 synthetic = 'Cluster'
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/multioutcome.mat"
+save_path = FIGURE_INPUTS_DIR / "multioutcome.mat"
 loaded_data = loadmat(save_path)
 i=0
 
-# cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
-# coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
-cost_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/Cluster_cost_list_BEACON.pt')
-coverage_NS_TS1 = torch.load('/fs/ess/PAS2983/jontwt/BEACON/Continuous_MultiOutcome/Results/Cluster_coverage_list_BEACON.pt')
+cost_NS_TS1 = torch.tensor(loaded_data['cost_NS_TS1_'+str(i)])
+coverage_NS_TS1 = torch.tensor(loaded_data['coverage_NS_TS1_'+str(i)])
 
 cost_BO = torch.tensor(loaded_data['cost_BO_'+str(i)])
 coverage_BO = torch.tensor(loaded_data['coverage_BO_'+str(i)])
@@ -156,5 +157,4 @@ ax2.tick_params(axis="both", labelsize=text_size)
 plt.savefig('Synthetic_Multioutcome.png',dpi=300)
 
         
-
 

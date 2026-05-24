@@ -1,5 +1,14 @@
+"""Plot the noisy Ackley sensitivity figure from saved result tensors."""
+
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
 
 noises = [0.5, 1.0, 2.0, 4.0]
 
@@ -12,23 +21,20 @@ alpha = 0.3
 fig, axes = plt.subplots(2, 2, figsize=(8, 6), dpi=300)
 
 for ax, noise in zip(axes.flat, noises):
+    result_dir = CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR / "Noise" / "4DAckley"
 
     cost_noise = torch.load(
-        f'/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'
-        f'4DNoisyAckley_cost_list_BEACON_considernoise_{noise}.pt'
+        result_dir / f'4DNoisyAckley_cost_list_BEACON_considernoise_{noise}.pt'
     )
     coverage_noise = torch.load(
-        f'/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'
-        f'4DNoisyAckley_coverage_list_BEACON_considernoise_{noise}.pt'
+        result_dir / f'4DNoisyAckley_coverage_list_BEACON_considernoise_{noise}.pt'
     )
 
     cost_noiseless = torch.load(
-        f'/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'
-        f'4DNoisyAckley_cost_list_BEACON_considernoiseless_{noise}.pt'
+        result_dir / f'4DNoisyAckley_cost_list_BEACON_considernoiseless_{noise}.pt'
     )
     coverage_noiseless = torch.load(
-        f'/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/'
-        f'4DNoisyAckley_coverage_list_BEACON_considernoiseless_{noise}.pt'
+        result_dir / f'4DNoisyAckley_coverage_list_BEACON_considernoiseless_{noise}.pt'
     )
 
     cov_noise_mean = torch.mean(coverage_noise, dim=0)

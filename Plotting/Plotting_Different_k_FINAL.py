@@ -1,5 +1,14 @@
+"""Plot BEACON sensitivity to k from saved result tensors."""
+
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
 
 synthetics = ['12DAckley', '12DRosen', '12DStyTang']
 titles = ['Ackley 12D', 'Rosenbrock 12D', 'Styblinski-Tang 12D']
@@ -8,7 +17,7 @@ k_list = [1, 5, 10, 20]
 markers = ['X', 'o', '^', 's']
 labels = ['k=1', 'k=5', 'k=10', 'k=20']
 
-path = '/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/Different k/'
+result_root = CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR / "Different k"
 
 marker_interval = 7
 text_size = 16
@@ -25,11 +34,11 @@ for idx, synthetic in enumerate(synthetics):
     for k, marker, label in zip(k_list, markers, labels):
 
         cost = torch.load(
-            f'{path}{synthetic}/{synthetic}_cost_list_BEACON_k{k}.pt'
+            result_root / synthetic / f'{synthetic}_cost_list_BEACON_k{k}.pt'
         )
 
         coverage = torch.load(
-            f'{path}{synthetic}/{synthetic}_coverage_list_BEACON_k{k}.pt'
+            result_root / synthetic / f'{synthetic}_coverage_list_BEACON_k{k}.pt'
         )
 
         coverage_mean = torch.mean(coverage, dim=0)

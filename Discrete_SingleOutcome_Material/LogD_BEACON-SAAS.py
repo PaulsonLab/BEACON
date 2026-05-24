@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Apr  3 19:34:15 2024
+"""Run the LogD SAAS discrete single-outcome BEACON study.
 
-@author: tang.1856
+Inputs: descriptor and LogD CSV files in data/materials.
+Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 
+import sys
+from pathlib import Path
 import torch
 import gpytorch
 from botorch.models import SingleTaskGP
@@ -31,6 +33,11 @@ import pandas as pd
 import os
 from botorch.models.fully_bayesian import SaasFullyBayesianSingleTaskGP
 from botorch import fit_fully_bayesian_model_nuts
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import MATERIALS_DIR
 
 
 def reachability_uniformity(behavior, n_bins = 25, obj_lb = -5, obj_ub = 5, n_hist = 25):
@@ -89,9 +96,7 @@ if __name__ == '__main__':
     
     # Data pre-processing
     #####################################################################################################################################################
-    path = os.getcwd()
-    base_path = path.split("BEACON")[0]
-    data_path = base_path+"BEACON/Material Data/extract_data_logD.csv"
+    data_path = MATERIALS_DIR / "extract_data_logD.csv"
     col_list=['LogD','Exp_RT']
     lc_df = pd.read_csv(data_path,usecols=col_list)
 
@@ -101,7 +106,7 @@ if __name__ == '__main__':
 
     # Import descriptor file
     
-    data_path = base_path+"BEACON/Material Data/descriptors_logD.csv"
+    data_path = MATERIALS_DIR / "descriptors_logD.csv"
     des_df = pd.read_csv(data_path,index_col=0)
 
     # Remove non_retained molecules
@@ -195,5 +200,4 @@ if __name__ == '__main__':
     # torch.save(cost_tensor, 'logD_cost_list_NS_SAAS.pt')  
     
     
-
 

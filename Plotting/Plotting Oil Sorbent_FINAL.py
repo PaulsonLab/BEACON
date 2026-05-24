@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Dec  5 16:38:49 2024
+"""Plot oil sorbent benchmark panels from saved figure inputs."""
 
-@author: tang.1856
-"""
-
+import sys
+from pathlib import Path
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from scipy.io import loadmat
 import torch
 
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/OilSorbent.mat"
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
+
+save_path = FIGURE_INPUTS_DIR / "OilSorbent.mat"
 loaded_data = loadmat(save_path)
 
 i=0
@@ -26,10 +29,6 @@ coverage_MaxVar_constraint = torch.tensor(loaded_data['coverage_MaxVar_'+str(i)]
 
 cost_RS_constraint = torch.tensor(loaded_data['cost_RS_'+str(i)])
 coverage_RS_constraint = torch.tensor(loaded_data['coverage_RS_'+str(i)])
-
-# cost_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_cost_list_NS_xspace_120.pt')[indice]
-# coverage_NSFS_constraint = torch.load('/home/tang.1856/BEACON/BEACON/Discrete_MultiOutcome/Oil_coverage_list_NS_xspace_120.pt')[indice]
-
 
 coverage_NS_mean_TS1 = torch.mean(coverage_BEACON, dim = 0)
 coverage_NS_std_TS1 = torch.std(coverage_BEACON, dim = 0)
@@ -60,8 +59,8 @@ text_size = 16
 # Create a 1x2 subfigure layout
 fig, axes = plt.subplots(2, 1, figsize=(6, 6), dpi=150)  # 1 row, 2 columns
 
-# Second subplot: display the PNG image
-img = mpimg.imread('/fs/ess/PAS2983/jontwt/BEACON/Plotting/OilSorbent_distribution.png')  # Replace 'your_image.png' with your file path
+# Second subplot: display the oil sorbent distribution image
+img = mpimg.imread(FIGURE_INPUTS_DIR / "OilSorbent_distribution.png")
 axes[0].imshow(img)
 axes[0].axis('off')  # Hide axes for the image
 # axes[0].set_title('PNG Image')

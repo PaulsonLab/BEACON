@@ -1,11 +1,7 @@
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# """
-# Created on Sat Mar 16 14:38:55 2024
+"""Plot maze benchmark panels from saved figure inputs."""
 
-# @author: tang.1856
-# """
-
+import sys
+from pathlib import Path
 
 import torch
 import matplotlib.pyplot as plt
@@ -14,34 +10,14 @@ import pandas as pd
 # import numpy as np
 from scipy.io import loadmat
 
-# Load your tensors (replace with actual data loading)
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
+
+
 synthetic = 'Maze'
-
-# cost_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
-# coverage_NS_TS1 = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cumbent_list_NS2.pt')
-
-# cost_BO = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_EI.pt')
-# coverage_BO = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_EI.pt')
-
-# cost_MaxVar = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
-# coverage_MaxVar = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_MaxVar.pt')
-
-# cost_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
-# coverage_RS = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_RS.pt')
-
-# cost_GA_NS_novel = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_GA.pt')
-# coverage_GA_NS_novel = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_GA.pt')
-
-# cost_DEA = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_DEA.pt')
-# coverage_DEA = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_DEA.pt')
-
-# # cost_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_NS_x_space.pt')
-# # coverage_NS_xspace = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_NS_x_space.pt')
-
-# cost_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
-# coverage_sobol = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_sobol.pt')
-
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/Maze.mat"
+save_path = FIGURE_INPUTS_DIR / "Maze.mat"
 loaded_data = loadmat(save_path)
 
 i=0
@@ -204,31 +180,3 @@ plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.08, wspace=0.2, hs
     # ax.spines['right'].set_linewidth(2)
     
     # plt.show()
-
-# from scipy.io import savemat
-# save_path = "/home/tang.1856/BEACON/BEACON/Plotting/Maze.mat"
-# # Create a dictionary to store all data
-# data_dict = {}
-
-# # Iterate through datasets and save data
-# for i in range(1):
-#     data_dict[f'cost_NS_TS1_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cost_list_NS.pt')
-#     data_dict[f'coverage_NS_TS1_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_TS_1_cumbent_list_NS2.pt')
-#     data_dict[f'cost_BO_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_EI.pt')
-#     data_dict[f'coverage_BO_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_EI.pt')
-#     data_dict[f'cost_MaxVar_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_MaxVar.pt')
-#     data_dict[f'coverage_MaxVar_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_MaxVar.pt')
-#     data_dict[f'cost_RS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_RS.pt')
-#     data_dict[f'coverage_RS_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_RS.pt')
-#     data_dict[f'cost_GA_NS_novel_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_GA.pt')
-#     data_dict[f'coverage_GA_NS_novel_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_GA.pt')
-#     data_dict[f'cost_Sobol_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_sobol.pt')
-#     data_dict[f'coverage_Sobol_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_sobol.pt')
-#     data_dict[f'cost_DEA_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cost_list_DEA.pt')
-#     data_dict[f'coverage_DEA_{i}'] = torch.load('/home/tang.1856/Jonathan/Novelty Search/Continuous_MultiOutcome/Results/'+synthetic+'/'+synthetic+'_cumbent_list_DEA.pt')
-   
-
-# # Save the dictionary to a .mat file
-# savemat(save_path, data_dict)
-
-

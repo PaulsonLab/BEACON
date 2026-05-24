@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Aug  4 14:09:00 2024
+"""Oil sorbent benchmark used by the discrete multi-outcome scripts.
 
-@author: tang.1856
+Inputs: synthetic process variables supplied by the caller.
+Runtime: lightweight by itself; the optimization scripts around it are expensive.
 """
 
 from typing import List, Optional
@@ -182,5 +182,4 @@ class OilSorbent():
         )
         
         return torch.cat([q, sigma], dim=-1)
-
 

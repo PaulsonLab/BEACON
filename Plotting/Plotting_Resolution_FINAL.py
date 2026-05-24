@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat May 23 19:00:51 2026
+"""Plot reachability sensitivity to grid resolution from saved tensors."""
 
-@author: jontwt
-"""
-
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
 
-path = '/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/Different Bins/'
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
+
+result_root = CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR / "Different Bins"
 
 synthetics = ['4DAckley', '4DRosen']
 synthetic_names = ['Ackley 4D', 'Rosenbrock 4D']
@@ -39,10 +42,10 @@ for row, synthetic in enumerate(synthetics):
         for label, (file_tag, marker, marker_interval) in methods.items():
             
             cost = torch.load(
-                f'{path}{synthetic}/{synthetic}_cost_list_{file_tag}_bins{bins}.pt'
+                result_root / synthetic / f'{synthetic}_cost_list_{file_tag}_bins{bins}.pt'
             )
             coverage = torch.load(
-                f'{path}{synthetic}/{synthetic}_coverage_list_{file_tag}_bins{bins}.pt'
+                result_root / synthetic / f'{synthetic}_coverage_list_{file_tag}_bins{bins}.pt'
             )
 
             coverage_mean = torch.mean(coverage, dim=0)

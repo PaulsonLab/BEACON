@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Apr 15 15:16:27 2024
+"""Run the ESOL discrete single-outcome BEACON study.
 
-@author: tang.1856
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 10 13:26:09 2024
-
-@author: tang.1856
+Inputs: ESOL benchmark loaded by Gauche.
+Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
 import torch
 import gpytorch
@@ -211,5 +203,4 @@ if __name__ == '__main__':
     # torch.save(coverage_tensor, 'ESOL_TS_1_coverage_list_NS.pt')
     # torch.save(cost_tensor, 'ESOL_TS_1_cost_list_NS.pt')      
     
-
 

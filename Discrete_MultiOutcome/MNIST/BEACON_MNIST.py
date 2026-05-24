@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Aug  1 12:50:40 2024
+"""Run the MNIST discrete multi-outcome BEACON study.
 
-@author: tang.1856
+Inputs: downloaded MNIST images plus trained VAE/CNN weights in models/mnist.
+Runtime: expensive; may download MNIST if data/mnist is not present.
 """
+import sys
+from pathlib import Path
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -27,6 +29,12 @@ from gpytorch.kernels import MaternKernel, RFFKernel, ScaleKernel
 from botorch.models import SingleTaskGP, SaasFullyBayesianSingleTaskGP, ModelListGP
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 import os
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import MNIST_DATA_DIR, MNIST_MODELS_DIR
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 dim_latent = 8  
@@ -122,21 +130,20 @@ transform = transforms.Compose([
     transforms.ToTensor()         # Convert the image to a tensor
 ])
 
-trainset = torchvision.datasets.MNIST(root='data', train = True, download = True, transform = transform)
-testset = torchvision.datasets.MNIST(root='./data', train = False, download = True, transform = transform)   
+trainset = torchvision.datasets.MNIST(root=MNIST_DATA_DIR, train = True, download = True, transform = transform)
+testset = torchvision.datasets.MNIST(root=MNIST_DATA_DIR, train = False, download = True, transform = transform)   
 trainset_resize, testset_resize = [],[]
  
 for i in range(len(testset)):
     testset_resize.append(testset[i][0])
     
 testset_resize = torch.stack(testset_resize).squeeze(1) 
-path = os.getcwd()
 VAE_trained = VAE()
-VAE_trained.load_state_dict(torch.load(path+'/VAE1.pth',map_location=torch.device('cpu')))
+VAE_trained.load_state_dict(torch.load(MNIST_MODELS_DIR / 'VAE1.pth', map_location=torch.device('cpu')))
 VAE_trained.eval()
 
 cnn_trained = CNN()
-cnn_trained.load_state_dict(torch.load(path+'/CNN2.pth',map_location=torch.device('cpu')))
+cnn_trained.load_state_dict(torch.load(MNIST_MODELS_DIR / 'CNN2.pth', map_location=torch.device('cpu')))
 cnn_trained.eval()
 
 torch.manual_seed(0)

@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 16 14:38:55 2024
-
-@author: tang.1856
-"""
+"""Plot a single synthetic k-sensitivity panel from saved tensors."""
+import sys
+from pathlib import Path
 import torch
 import matplotlib.pyplot as plt
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR
+
 synthetic = '12DAckley'
 bins = 1
-path = '/fs/ess/PAS2983/jontwt/BEACON/Continuous_SingleOutcome/Results/Different k/'
-cost_NS_TS1 = torch.load(path+synthetic+'/'+synthetic+'_cost_list_BEACON_'+'k'+str(bins)+'.pt')
-coverage_NS_TS1 = torch.load(path+synthetic+'/'+synthetic+'_coverage_list_BEACON_'+'k'+str(bins)+'.pt')
+result_dir = CONTINUOUS_SINGLE_OUTCOME_RESULTS_DIR / "Different k" / synthetic
+cost_NS_TS1 = torch.load(result_dir / f"{synthetic}_cost_list_BEACON_k{bins}.pt")
+coverage_NS_TS1 = torch.load(result_dir / f"{synthetic}_coverage_list_BEACON_k{bins}.pt")
 
-cost_NS_TS2 = torch.load(path+synthetic+'/'+synthetic+'_cost_list_BEACON_'+'k'+str(bins*5)+'.pt')
-coverage_NS_TS2 = torch.load(path+synthetic+'/'+synthetic+'_coverage_list_BEACON_'+'k'+str(bins*5)+'.pt')
+cost_NS_TS2 = torch.load(result_dir / f"{synthetic}_cost_list_BEACON_k{bins*5}.pt")
+coverage_NS_TS2 = torch.load(result_dir / f"{synthetic}_coverage_list_BEACON_k{bins*5}.pt")
 
-cost_NS_TS3 = torch.load(path+synthetic+'/'+synthetic+'_cost_list_BEACON_'+'k'+str(bins*10)+'.pt')
-coverage_NS_TS3 = torch.load(path+synthetic+'/'+synthetic+'_coverage_list_BEACON_'+'k'+str(bins*10)+'.pt')
+cost_NS_TS3 = torch.load(result_dir / f"{synthetic}_cost_list_BEACON_k{bins*10}.pt")
+coverage_NS_TS3 = torch.load(result_dir / f"{synthetic}_coverage_list_BEACON_k{bins*10}.pt")
 
-cost_NS_TS4 = torch.load(path+synthetic+'/'+synthetic+'_cost_list_BEACON_'+'k'+str(bins*20)+'.pt')
-coverage_NS_TS4 = torch.load(path+synthetic+'/'+synthetic+'_coverage_list_BEACON_'+'k'+str(bins*20)+'.pt')
+cost_NS_TS4 = torch.load(result_dir / f"{synthetic}_cost_list_BEACON_k{bins*20}.pt")
+coverage_NS_TS4 = torch.load(result_dir / f"{synthetic}_coverage_list_BEACON_k{bins*20}.pt")
 
 
 

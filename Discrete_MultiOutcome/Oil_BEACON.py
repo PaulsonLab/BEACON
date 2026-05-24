@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 10 13:26:09 2024
+"""Run the oil sorbent discrete multi-outcome BEACON study.
 
-@author: tang.1856
+Inputs: synthetic OilSorbent benchmark defined in this folder.
+Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
-import sys 
-sys.path.append("../")
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
 import torch
 import gpytorch
 from botorch.models import SingleTaskGP, SaasFullyBayesianSingleTaskGP, ModelListGP
@@ -30,7 +34,6 @@ from botorch.test_functions import Rosenbrock, Ackley, Hartmann, StyblinskiTang
 import pickle
 from botorch.models.transforms.outcome import Standardize
 
-# sys.path.append('/home/tang.1856/Jonathan/Novelty Search')
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from src.ThompsonSampling import EfficientThompsonSampler
 

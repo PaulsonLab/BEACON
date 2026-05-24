@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Mar 10 13:26:09 2024
+"""Run the hydrogen uptake discrete single-outcome BEACON study.
 
-@author: tang.1856
+Inputs: hydrogen_input_output.pkl in data/materials.
+Runtime: expensive; intended for reproducing a paper experiment, not a smoke test.
 """
+import sys
+from pathlib import Path
 import torch
 import gpytorch
 from botorch.models import SingleTaskGP
@@ -27,6 +29,11 @@ import pickle
 from botorch.models.transforms.outcome import Standardize
 import os
 import pandas as pd
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import MATERIALS_DIR
 
 
 
@@ -109,14 +116,12 @@ if __name__ == '__main__':
     cost_tensor = []
     coverage_tensor = []
     
-    path = os.getcwd()
-    base_path = path.split("BEACON")[0]
-    
     # Case Study: Hydrogen adsorption
     # load H2 adsorption MOF data from pkl file 
     dim = 8
-    X_original = pickle.load(open(base_path+'BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['x'] # data from Ghude and Chowdhury 2023 (7 features for MOFs)
-    y_original = pickle.load(open(base_path+'BEACON/Material Data/hydrogen_input_output.pkl', 'rb'))['y'] # data from Ghude and Chowdhury 2023 (H2 adsorp capacity)
+    hydrogen_data_path = MATERIALS_DIR / "hydrogen_input_output.pkl"
+    X_original = pickle.load(open(hydrogen_data_path, 'rb'))['x'] # data from Ghude and Chowdhury 2023 (7 features for MOFs)
+    y_original = pickle.load(open(hydrogen_data_path, 'rb'))['y'] # data from Ghude and Chowdhury 2023 (H2 adsorp capacity)
     
     
     y_original = np.reshape(y_original, (np.size(y_original), 1)) 
@@ -176,5 +181,4 @@ if __name__ == '__main__':
     
     
     
-
 

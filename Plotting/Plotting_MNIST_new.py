@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Aug  1 13:42:10 2024
-
-@author: tang.1856
-"""
+"""Plot MNIST benchmark panels from saved figure inputs."""
+import sys
+from pathlib import Path
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from scipy.io import loadmat
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
+
+from src.paths import FIGURE_INPUTS_DIR
 
 text_size = 16
 marker_size = 14
@@ -21,7 +24,7 @@ alpha = 0.3
 
 indice = [0,3,5,7,9,10,11,12,13,15]
 
-save_path = "/fs/ess/PAS2983/jontwt/BEACON/Plotting/MNIST.mat"
+save_path = FIGURE_INPUTS_DIR / "MNIST.mat"
 loaded_data = loadmat(save_path)
 
 i=0
@@ -38,20 +41,16 @@ fig, axes = plt.subplots(1, 2, figsize=(16,12))  # 3 rows, 3 columns
 # Add plots and legends to subplots
 for i, ax in enumerate(axes.flat):
     
-    # reachability_list_BEACON = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON.pt'))[indice]
     mean = np.mean(reachability_list_BEACON, axis=0)
     std = np.std(reachability_list_BEACON, axis=0)
     
     
-    # reachability_list_BEACON_bc = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON_bc.pt'))[indice]
     mean_bc = np.median(reachability_list_BEACON_bc, axis=0)
     std_bc = np.std(reachability_list_BEACON_bc, axis=0)
     
-    # reachability_list_RS = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_RS.pt'))[indice]
     meanRS = np.median(reachability_list_RS, axis=0)
     stdRS = np.std(reachability_list_RS, axis=0)
     
-    # reachability_list_GA = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NSEA.pt'))[indice]
     meanGA = np.median(reachability_list_GA, axis=0)
     stdGA = np.std(reachability_list_GA, axis=0)
     
@@ -174,17 +173,3 @@ for i, ax in enumerate(axes.flat):
         # plt.show()
 
 plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.08, wspace=0.2, hspace=0.1)    
-# from scipy.io import savemat
-# save_path = "/home/tang.1856/BEACON/BEACON/Plotting/MNIST.mat"
-# # Create a dictionary to store all data
-# data_dict = {}
-
-# # Iterate through datasets and save data
-# for i in range(1):
-#     data_dict[f'coverage_BEACON_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON.pt'))[indice]
-#     data_dict[f'coverage_BEACON_bc_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_BEACON_bc.pt'))[indice]
-#     data_dict[f'cost_RS_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_reachability_RS.pt'))[indice]
-#     data_dict[f'coverage_NSEA_{i}'] = np.array(torch.load('/home/tang.1856/BEACON/BEACON/MNIST/Results_MNIST/MNIST_coverage_list_NSEA.pt'))[indice]
-   
-# # Save the dictionary to a .mat file
-# savemat(save_path, data_dict)
