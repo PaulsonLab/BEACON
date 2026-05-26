@@ -9,6 +9,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_NAME = re.compile(r"^[a-z0-9][a-z0-9-]*(\.py)?$")
+SI_FIGURE_SCRIPT = Path("figures/scripts/plot-direct-reachability-vs-beacon-1d.py")
 
 
 def git_ls_files(*patterns):
@@ -151,6 +152,7 @@ def test_plotting_scripts_save_to_figure_outputs_dir():
     offenders = []
 
     for path in sorted((REPO_ROOT / "figures" / "scripts").glob("*.py")):
+        rel_path = path.relative_to(REPO_ROOT)
         source = path.read_text(encoding="utf-8")
         lines = source.splitlines()
         tree = ast.parse(source, filename=str(path))
@@ -166,15 +168,19 @@ def test_plotting_scripts_save_to_figure_outputs_dir():
                 show_calls.append(node)
 
         if not savefig_calls:
-            offenders.append(f"{path.relative_to(REPO_ROOT)} has no active savefig call")
+            offenders.append(f"{rel_path} has no active savefig call")
 
         for call in savefig_calls:
+            if rel_path == SI_FIGURE_SCRIPT:
+                if "FIGURES_DIR" not in source:
+                    offenders.append(f"{rel_path} does not use FIGURES_DIR for default outputs")
+                continue
             line = lines[call.lineno - 1]
             if "FIGURE_OUTPUTS_DIR" not in line:
-                offenders.append(f"{path.relative_to(REPO_ROOT)}:{call.lineno}")
+                offenders.append(f"{rel_path}:{call.lineno}")
 
         for call in show_calls:
-            offenders.append(f"{path.relative_to(REPO_ROOT)}:{call.lineno} has active show call")
+            offenders.append(f"{rel_path}:{call.lineno} has active show call")
 
     assert offenders == []
 
