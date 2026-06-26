@@ -4,7 +4,7 @@ Companion code for [BEACON: A Bayesian Optimization Inspired Strategy for Effici
 
 BEACON uses Bayesian optimization ideas to search for novel behaviors in expensive black-box systems. This repository is organized as a paper companion: experiment scripts remain close to the manuscript studies, while shared inputs, saved outputs, trained weights, and plotting data live in predictable top-level folders.
 
-Below animation demonstrates the sampling progress of Random Sampling and BEACON on the synthetic multi-output problem considered in the paper. Results of Reachability can be found in Figure 3.
+The animations below illustrate the sampling progress of Random Sampling (RS) and BEACON on the synthetic multi-output problem considered in the paper. BEACON efficiently explores the entire outcome space, achieving broad and uniform coverage throughout the process. In contrast, RS struggles to escape the central outcome region, where the majority of the function's outcomes are concentrated, resulting in substantially poorer exploration. Quantitative reachability results are presented in Figure 3 of the paper.
 ![Demo](figures/Random_vs_BEACON%20(2).gif)
 
 ## Repository Map
