@@ -1,6 +1,6 @@
 # BEACON
 
-Companion code for [BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616).
+Companion code for [BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616). BEACON has been published at the Digital Discovery Journal.
 
 BEACON uses Bayesian optimization ideas to search for novel behaviors in expensive black-box systems. This repository is organized as a paper companion: experiment scripts remain close to the manuscript studies, while shared inputs, saved outputs, trained weights, and plotting data live in predictable top-level folders.
 
