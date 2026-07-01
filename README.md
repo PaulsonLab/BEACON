@@ -1,6 +1,6 @@
 # BEACON
 
-Companion code for [BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search](https://arxiv.org/abs/2406.03616). BEACON has been published at the Digital Discovery Journal.
+Companion code for [BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search](https://doi.org/10.1039/d6dd00123h). BEACON has been published at the Digital Discovery Journal.
 
 BEACON uses Bayesian optimization ideas to search for novel behaviors in expensive black-box systems. This repository is organized as a paper companion: experiment scripts remain close to the manuscript studies, while shared inputs, saved outputs, trained weights, and plotting data live in predictable top-level folders.
 
@@ -99,10 +99,11 @@ The high-dimensional extension, TR-BEACON, is described in the [paper](https://o
 If you use this code in your research, please cite:
 
 ```bibtex
-@article{tang2024beacon,
-  title={Beacon: A bayesian optimization strategy for novelty search in expensive black-box systems},
-  author={Tang, Wei-Ting and Chakrabarty, Ankush and Paulson, Joel A},
-  journal={arXiv preprint arXiv:2406.03616},
-  year={2024}
+@article{tang2026beacon,
+  title={BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search},
+  author={Tang, Wei-Ting and Chakrabarty, Ankush and Paulson, Joel},
+  journal={Digital Discovery},
+  year={2026},
+  publisher={Royal Society of Chemistry}
 }
 ```
