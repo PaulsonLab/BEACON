@@ -15,7 +15,7 @@ or, step by step on your own data::
     idx = algo.suggest(train_x, train_y, candidates=X, available=m)  # discrete
 """
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 
 from beacon.algorithms import ALGORITHMS, BEACON, BEACONSAAS, UGBEACON, BeaconConfig, get_algorithm
 from beacon.device import resolve_device, set_seed

@@ -541,6 +541,10 @@ regenerates a whole study:
 beacon reproduce synthetic --device cuda      # also: noise, materials, molecules, oil-sorbent, mnist, ...
 ```
 
+Version 2.0.0 fixes bugs that change BEACON's results slightly. For the code exactly as
+published with the paper, check out the [`v1.0.0`](https://github.com/PaulsonLab/BEACON/tree/v1.0.0)
+tag (`git checkout v1.0.0`).
+
 **[experiments/README.md](experiments/README.md)** has the full guide: the benchmark problems and
 their settings, the per-experiment scripts, the evaluation metrics, regenerating the figures, and
 what differs from the original results (see also [CHANGELOG.md](CHANGELOG.md)).

@@ -8,7 +8,8 @@ authors:
     given-names: Ankush
   - family-names: Paulson
     given-names: Joel A.
-version: 1.0.0
+version: 2.0.0
+date-released: "2026-10-11"
 repository-code: "https://github.com/PaulsonLab/BEACON"
 url: "https://doi.org/10.1039/d6dd00123h"
 identifiers:

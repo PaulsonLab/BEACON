@@ -176,7 +176,9 @@ For example, `results/generated/paper/ackley-4d/coverage.pt` and `cost.pt` corre
 `results/continuous-single-outcome/4DAckley/4DAckley_coverage_list_BEACON.pt` and
 `..._cost_list_BEACON.pt`.
 
-**What to expect.**
+**What to expect.** The code exactly as published with the paper is tagged
+[`v1.0.0`](https://github.com/PaulsonLab/BEACON/tree/v1.0.0); this guide describes version 2.0.0.
+
 
 * Initial designs and metrics match the saved results exactly for the synthetic, noisy Ackley and
   materials/molecule studies (checked by [`tests/test_problems.py`](../tests/test_problems.py)).

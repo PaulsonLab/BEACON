@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.0.0 — package refactor
+## 2.0.0 — package refactor (2026-10-11)
+
+> **Looking for the code exactly as published with the paper?** Use the
+> [`v1.0.0`](https://github.com/PaulsonLab/BEACON/tree/v1.0.0) tag. Version 2.0.0
+> fixes bugs that change BEACON's results (see below), so its numbers will not
+> match v1.0.0 bit-for-bit.
 
 This release turns the paper's research scripts into an installable package
 (`beacon`) with a single tested implementation of BEACON, UG-BEACON and
