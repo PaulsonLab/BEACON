@@ -1,7 +1,7 @@
-# BEACON
+# BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search
 
-Companion code for **[BEACON: A Bayesian Optimization Inspired Strategy for Efficient Novelty Search](https://doi.org/10.1039/d6dd00123h)**
-(W.-T. Tang, A. Chakrabarty, J. A. Paulson, *Digital Discovery*, 2026; [arXiv:2406.03616](https://arxiv.org/abs/2406.03616)).
+Companion code for the [paper](https://doi.org/10.1039/d6dd00123h) by W.-T. Tang, A. Chakrabarty and
+J. A. Paulson (*Digital Discovery*, 2026; [arXiv:2406.03616](https://arxiv.org/abs/2406.03616)).
 
 BEACON searches for **novel behaviours** in expensive black-box systems: instead of optimizing one
 objective, it tries to observe as many *different* outcomes as possible within a small evaluation
@@ -13,7 +13,9 @@ The animation compares random sampling (RS) with BEACON on the paper's synthetic
 problem. BEACON spreads its samples over the whole outcome space; RS stays in the central region
 where most outcomes concentrate (paper, Fig. 3).
 
-![Random sampling vs BEACON](figures/Random_vs_BEACON%20(2).gif)
+![Random sampling vs BEACON](assets/random-vs-beacon.gif)
+
+*Animation file: [`assets/random-vs-beacon.gif`](assets/random-vs-beacon.gif).*
 
 **Contents**
 [Method overview](#method-overview) ·
@@ -106,6 +108,7 @@ models/mnist/              Pretrained VAE and CNN weights for the MNIST study
 results/                   Saved paper results (continuous-single-outcome/, plot-data/)
                            and generated outputs (generated/, ignored by git)
 tests/                     Unit, integration and paper-setting tests
+assets/                    README media (random sampling vs BEACON animation)
 toc_assets/                Table-of-contents graphic
 ```
 
