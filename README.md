@@ -100,6 +100,7 @@ beacon/                    The installable package
 ├── optimization.py        Quiet wrappers around BoTorch's fitting/acquisition optimization
 └── paths.py               Repository-relative data/result paths
 experiments/               One thin script per paper experiment (calls beacon.cli)
+examples/                  Runnable custom-problem examples (continuous oil sorbent, discrete MOF library)
 figures/scripts/           Plotting scripts for the paper figures (read results/)
 data/materials/            Materials and molecule datasets
 models/mnist/              Pretrained VAE and CNN weights for the MNIST study
@@ -469,60 +470,158 @@ parallel by launching several processes with different `--seed` and `--output-di
 
 ## Using BEACON on your own problem
 
-### 1. Ask-tell use with your own experiments
+BEACON needs three things from you:
 
-`suggest` proposes the next input from data you already have. Nothing else is needed:
+1. a way to **evaluate** inputs: a simulator, a lab experiment, or a lookup in a database;
+2. the **design space**: a box of continuous variables, or a finite library of candidates;
+3. the **outcomes** whose diversity you care about, as an `(n, m)` tensor.
+
+Two complete, runnable examples built on the paper's materials case studies live in
+[`examples/`](examples/). Each first drives BEACON with an ask-tell loop (Part A), then wraps the
+same black box as a problem for `run_experiment` (Part B):
+
+```sh
+python examples/continuous_oil_sorbent.py --device auto     # continuous design space
+python examples/discrete_nitrogen_mofs.py --device auto     # discrete candidate library
+# add --quick for a ~10 s smoke test
+```
+
+### Example 1 — continuous: designing oil sorbents
+
+Seven process variables (polymer ratios, concentrations, temperatures, …) determine an oil
+sorbent's **absorption capacity** and **mechanical strength** (paper Sec. 5.5). The paper's
+response surfaces stand in for experiments here. The variables are continuous within physical
+bounds, so BEACON maximizes its acquisition with gradients.
+
+**Part A — ask-tell loop.** BEACON proposes; you evaluate:
 
 ```python
 import torch
 from beacon import get_algorithm
+from beacon.problems.oil_sorbent import OIL_LOWER, OIL_UPPER, oil_sorbent
 
-algo = get_algorithm("beacon", k=10, archive="posterior_mean")   # or "beacon-saas"
+LOWER, UPPER = OIL_LOWER.double(), OIL_UPPER.double()     # physical bounds of the 7 variables
+SCALE = torch.tensor([2.0e5, 1.25e4], dtype=torch.double)  # typical [capacity, strength]
 
-# Continuous design space scaled to [0, 1]^d:
-bounds = torch.tensor([[0.0] * 3, [1.0] * 3], dtype=torch.double)
-x_next = algo.suggest(train_x, train_y, bounds=bounds)      # (1, d); train_y is (n, m)
+def sorbent_properties(X):                     # (n, 7) physical -> (n, 2) scaled outcomes
+    return oil_sorbent(X).clamp_min(0) / SCALE
 
-# Finite library of candidates (e.g. a materials database):
-available = torch.ones(len(X_library), dtype=torch.bool)
-available[already_tested] = False
-idx = algo.suggest(train_x, train_y, candidates=X_library, available=available)
+def evaluate(x_unit):                          # replace with your simulator or experiment
+    return sorbent_properties(LOWER + (UPPER - LOWER) * x_unit)
+
+X = torch.rand(10, 7, dtype=torch.double)      # initial design on the unit cube [0, 1]^7
+Y = evaluate(X)
+bounds = torch.stack([torch.zeros(7), torch.ones(7)]).double()
+algo = get_algorithm("beacon", k=10, kernel="rbf", archive="observed")
+
+for _ in range(30):
+    x_next = algo.suggest(X, Y, bounds=bounds)  # (1, 7) in [0, 1]^7
+    X, Y = torch.cat([X, x_next]), torch.cat([Y, evaluate(x_next)])
+
+recipes = LOWER + (UPPER - LOWER) * X          # proposed recipes in physical units
 ```
 
-Scale continuous inputs to the unit cube. Outcomes are standardized internally, but they should be
-on comparable scales across outputs, because distances are computed in the original outcome units.
+Two points about this example:
 
-### 2. Register a problem to get the runner, CLI, seeding and saving
+* **Inputs** are optimized on `[0, 1]^d`; map them to physical units inside `evaluate`.
+* **Outcomes** are divided by `SCALE` because novelty is a Euclidean distance in outcome space.
+  Without it, capacity (~10⁵) would swamp strength (~10⁴).
+
+**Part B — as a problem for the runner.** This adds replicates, seeding, reachability tracking
+and result files, and makes UG-BEACON available:
 
 ```python
-import torch
-from beacon import ContinuousProblem, DiscreteProblem, register_problem, run_experiment
+from beacon import ContinuousProblem, run_experiment
 from beacon.metrics import GridPartition, Reachability
 
-def my_simulator(X):                        # X: (n, 3) physical inputs -> (n, 2) outcomes
-    return torch.stack([X.sum(-1), (X ** 2).sum(-1)], dim=-1)
+partition = GridPartition(lower=[0, 0], upper=[1, 1], n_bins=10)   # 10x10 behaviour regions
+# Normalize by the cells a dense random sample reaches (1.0 = every reachable cell found).
+X_dense = torch.rand(100_000, 7, dtype=torch.double)
+reachable = sorbent_properties(LOWER + (UPPER - LOWER) * X_dense)
 
-def make_my_problem(**kwargs):
-    part = GridPartition(lower=[0, 0], upper=[3, 3], n_bins=10)
-    return ContinuousProblem(
-        name="my-problem", objective=my_simulator, input_dim=3, output_dim=2,
-        lower=0.0, upper=1.0,                       # physical box; BEACON works on [0, 1]^d
-        metric=Reachability(part), partition=part,  # partition also drives UG-BEACON
-        noise_std=0.0,
-        defaults={"n_init": 10, "iterations": 100, "replicates": 5, "k": 10, "archive": "observed"},
-    )
-
-register_problem("my-problem", make_my_problem, "My simulator")
-result = run_experiment("my-problem", "ug-beacon", device="auto")
+problem = ContinuousProblem(
+    name="oil-sorbent-continuous", objective=sorbent_properties,
+    input_dim=7, output_dim=2, lower=LOWER, upper=UPPER,
+    metric=Reachability.from_dataset(partition, reachable),
+    partition=partition,                                   # also UG-BEACON's regions
+    defaults=dict(n_init=10, iterations=100, replicates=3, k=10, kernel="rbf", archive="observed"),
+)
+for algorithm in ("beacon", "ug-beacon"):
+    print(run_experiment(problem, algorithm, device="auto", output_dir=None, verbose=0).summary())
 ```
 
-For a dataset, use
-`DiscreteProblem(name, X, Y, metric=Reachability.from_dataset(part, Y), partition=part, defaults=...)`.
-After `register_problem`, the problem is also available from the CLI within the same Python
-process. To make it available to `beacon run`, add an entry to `_BUILTINS` in
-`beacon/problems/__init__.py`.
+After 60 evaluations (2 seeds, CPU), BEACON reaches 66–71% of the 65 reachable cells and UG-BEACON
+reaches 75–82%. 70 uniformly random points reach 58–62%.
 
-### 3. Extension points
+### Example 2 — discrete: diverse nitrogen uptake in a MOF database
+
+`data/materials/Nitrogen.csv` lists 5,224 metal–organic frameworks with 20 structural and chemical
+descriptors and their N₂ uptake (paper Sec. 5.2). Each "evaluation" reveals one MOF's uptake; in
+practice that would be a simulation or a measurement. BEACON picks which *untested* MOF to evaluate
+next. Use the same pattern for any table of candidates.
+
+**Part A — ask-tell over a candidate library:**
+
+```python
+import numpy as np, pandas as pd, torch
+from beacon import get_algorithm
+from beacon.paths import MATERIALS_DIR
+
+df = pd.read_csv(MATERIALS_DIR / "Nitrogen.csv", encoding="utf-8-sig")
+X = torch.tensor(df[df.columns[1:21]].to_numpy(dtype=np.float64))     # 20 descriptors
+X = (X - X.min(0).values) / (X.max(0).values - X.min(0).values)       # min-max scale
+Y = torch.tensor(df["U_N2 (mol/kg)"].to_numpy(dtype=np.float64)).unsqueeze(-1)
+
+tested = list(np.random.RandomState(0).choice(len(X), size=10, replace=False))  # initial screen
+available = torch.ones(len(X), dtype=torch.bool)
+available[tested] = False
+
+algo = get_algorithm("beacon", k=10, kernel="matern", archive="observed")   # paper's MOF setup
+for _ in range(30):
+    idx = algo.suggest(X[tested], Y[tested], candidates=X, available=available)
+    # Real campaign: simulate/measure MOF df["MOF"][idx] here and record its uptake.
+    tested.append(idx)
+    available[idx] = False
+```
+
+`suggest` returns the index of the chosen candidate and never repeats one marked unavailable. For
+libraries larger than `max_exact_candidates` (6000), Thompson samples switch automatically from
+exact joint sampling to the linear-cost pathwise sampler.
+
+**Part B — as a `DiscreteProblem`:**
+
+```python
+from beacon import DiscreteProblem, run_experiment
+from beacon.metrics import HistogramPartition, Reachability
+
+partition = HistogramPartition(float(Y.min()), float(Y.max()), n_bins=25)   # 25 uptake levels
+problem = DiscreteProblem(
+    "nitrogen-mofs", X, Y,
+    metric=Reachability.from_dataset(partition, Y),   # 1.0 = every attainable level found
+    partition=partition,
+    defaults=dict(n_init=10, iterations=100, replicates=3, k=10, kernel="matern", archive="observed"),
+)
+result = run_experiment(problem, "beacon", device="auto")
+```
+
+This reproduces the built-in `nitrogen` benchmark exactly (same inputs, outcomes and per-seed
+reachability), so it is a good template for your own database. Use `HistogramPartition` or
+`GridPartition` for one or two outcomes, `BoxPartition` for non-uniform regions, and
+`ClassifierPartition` for class labels. Fingerprint representations can use `kernel="tanimoto"`
+(see [Choosing a kernel](#choosing-a-kernel)).
+
+### Practical tips
+
+* **Archive.** Use `archive="observed"` for noise-free or low-noise outcomes. Use
+  `"posterior_mean"` (the default) when measurements are noisy, so that noise is not mistaken for
+  novelty.
+* **Initial design.** About 10 random points (or a space-filling design) is enough to start. The
+  paper used 10 for most studies.
+* **Making a problem available to the CLI.** `register_problem("name", factory)` makes a problem
+  available to `run_experiment("name", ...)` in the same Python process. To make it available to
+  `beacon run --problem name`, add it to `_BUILTINS` in `beacon/problems/__init__.py`.
+
+### Extension points
 
 * **Behaviour regions**: subclass `beacon.metrics.OutcomePartition` (implement
   `membership(Y) -> (N, M) bool`), or use `HistogramPartition`, `GridPartition`, `BoxPartition` or
