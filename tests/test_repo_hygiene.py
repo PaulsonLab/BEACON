@@ -13,14 +13,17 @@ SI_FIGURE_SCRIPT = Path("figures/scripts/plot-direct-reachability-vs-beacon-1d.p
 
 
 def git_ls_files(*patterns):
-    result = subprocess.run(
-        ["git", "ls-files", *patterns],
-        cwd=REPO_ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return [REPO_ROOT / line for line in result.stdout.splitlines() if line]
+    """Tracked files matching ``patterns``; falls back to a filesystem walk when git is unusable."""
+    result = subprocess.run(["git", "ls-files", *patterns], cwd=REPO_ROOT, capture_output=True, text=True)
+    if result.returncode == 0:
+        return [REPO_ROOT / line for line in result.stdout.splitlines() if line]
+    skip = {".git", ".venv", "venv", "env", "results", "__pycache__", ".pytest_cache"}
+    files = []
+    for pattern in patterns:
+        for path in REPO_ROOT.rglob(pattern):
+            if not skip.intersection(path.relative_to(REPO_ROOT).parts):
+                files.append(path)
+    return files
 
 
 def tracked_python_files():
@@ -36,7 +39,9 @@ def test_python_files_parse():
 def test_beacon_package_imports():
     paths = importlib.import_module("beacon.paths")
     optimization = importlib.import_module("beacon.optimization")
-    importlib.import_module("beacon.thompson_sampling")
+    for module in ("thompson_sampling", "acquisition", "algorithms", "metrics", "models", "runner", "cli",
+                   "device", "paper", "problems"):
+        importlib.import_module(f"beacon.{module}")
 
     assert paths.REPO_ROOT == REPO_ROOT
     assert paths.PLOT_DATA_DIR == REPO_ROOT / "results" / "plot-data"
@@ -81,6 +86,10 @@ def test_required_scripts_and_artifacts_exist():
         "experiments/continuous/multi-outcome/synthetic-beacon.py",
         "experiments/discrete/single-outcome-material/logd-beacon.py",
         "experiments/discrete/multi-outcome/oil-beacon.py",
+        "experiments/discrete/multi-outcome/oil-ug-beacon.py",
+        "experiments/discrete/single-outcome-material/logd-beacon-saas.py",
+        "pyproject.toml",
+        "CHANGELOG.md",
         "experiments/discrete/multi-outcome/mnist/mnist-beacon.py",
         "figures/scripts/plot-synthetic.py",
         "figures/scripts/plot-mof.py",
@@ -124,9 +133,7 @@ def test_no_stale_paths_or_imports_in_python_files():
 
 
 def test_public_script_names_are_lowercase_dash():
-    helper_modules = {
-        Path("experiments/discrete/multi-outcome/oil_sorbent.py"),
-    }
+    helper_modules = set()
     public_roots = (
         Path("experiments"),
         Path("figures") / "scripts",
@@ -185,64 +192,32 @@ def test_plotting_scripts_save_to_figure_outputs_dir():
     assert offenders == []
 
 
-def test_experiment_scripts_save_to_generated_results_dir():
-    helper_modules = {
-        Path("experiments/discrete/multi-outcome/oil_sorbent.py"),
-    }
+def test_experiment_scripts_are_thin_cli_wrappers():
+    """Experiment scripts delegate to the package so all runs share one tested code path."""
     offenders = []
-
     for path in sorted((REPO_ROOT / "experiments").rglob("*.py")):
-        rel_path = path.relative_to(REPO_ROOT)
-        if rel_path in helper_modules:
-            continue
-
         source = path.read_text(encoding="utf-8")
-        tree = ast.parse(source, filename=str(path))
-        save_calls = [
-            node
-            for node in ast.walk(tree)
-            if isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "save"
-            and isinstance(node.func.value, ast.Name)
-            and node.func.value.id == "torch"
-        ]
-
-        if not save_calls:
-            offenders.append(f"{rel_path} has no active torch.save call")
-            continue
-        if "GENERATED_RESULTS_DIR" not in source:
-            offenders.append(f"{rel_path} does not import GENERATED_RESULTS_DIR")
-        if "output_dir = GENERATED_RESULTS_DIR" not in source:
-            offenders.append(f"{rel_path} does not build output_dir from GENERATED_RESULTS_DIR")
-
-        for call in save_calls:
-            if len(call.args) < 2:
-                offenders.append(f"{rel_path}:{call.lineno} torch.save has no destination")
-                continue
-            destination = call.args[1]
-            if isinstance(destination, ast.Constant) and isinstance(destination.value, str):
-                offenders.append(f"{rel_path}:{call.lineno} saves to a bare string path")
-
+        if "script_main(" not in source or "--problem" not in source or "--algorithm" not in source:
+            offenders.append(str(path.relative_to(REPO_ROOT)))
     assert offenders == []
 
 
-def test_continuous_scripts_use_quiet_acquisition_optimizer():
+def test_package_uses_quiet_acquisition_optimizer_and_no_retired_deps():
     offenders = []
-
-    for path in sorted((REPO_ROOT / "experiments" / "continuous").rglob("*.py")):
+    for path in sorted((REPO_ROOT / "beacon").rglob("*.py")):
         source = path.read_text(encoding="utf-8")
         tree = ast.parse(source, filename=str(path))
-
         for node in ast.walk(tree):
-            if not isinstance(node, ast.Call):
-                continue
-            func = node.func
-            if isinstance(func, ast.Name) and func.id == "optimize_acqf":
-                offenders.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}")
-            elif isinstance(func, ast.Attribute) and func.attr == "optimize_acqf":
-                offenders.append(f"{path.relative_to(REPO_ROOT)}:{node.lineno}")
-
+            if isinstance(node, ast.Call):
+                func = node.func
+                name = func.id if isinstance(func, ast.Name) else getattr(func, "attr", None)
+                if name == "optimize_acqf" and path.name != "optimization.py":
+                    offenders.append(f"{path.name}:{node.lineno} calls optimize_acqf directly")
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                modules = [a.name for a in node.names] if isinstance(node, ast.Import) else [node.module or ""]
+                for module in modules:
+                    if module.split(".")[0] in {"pyDOE2", "sklearn", "torchvision"}:
+                        offenders.append(f"{path.name}:{node.lineno} imports {module}")
     assert offenders == []
 
 

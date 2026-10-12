@@ -37,3 +37,8 @@ figures/output/
 *.tif
 *.tiff
 !results/plot-data/OilSorbent_distribution.png
+
+# Packaging
+*.egg-info/
+build/
+dist/

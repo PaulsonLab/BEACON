@@ -1,40 +1,22 @@
 """Focused checks for quiet continuous optimization helpers."""
 
-import importlib.util
-import os
 import warnings
-from pathlib import Path
 
 import numpy as np
 import pytest
 import torch
-from botorch.models import SingleTaskGP
-from botorch.models.transforms.outcome import Standardize
 from botorch.test_functions import Ackley
-from gpytorch.kernels import RBFKernel, ScaleKernel
-from gpytorch.mlls import ExactMarginalLogLikelihood
 
+from beacon.acquisition import BeaconAcquisition
+from beacon.models import build_independent_gps
 from beacon.optimization import (
     DTYPE,
-    fit_gpytorch_mll_quiet,
     optimize_acqf_quiet,
     report_warnings,
     run_with_warning_capture,
     validate_acquisition_result,
     warning_stage_summary,
 )
-
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_ackley_module():
-    os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/mplcache")
-    path = REPO_ROOT / "experiments" / "continuous" / "single-outcome" / "ackley-beacon.py"
-    spec = importlib.util.spec_from_file_location("ackley_beacon", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def test_warning_capture_distinguishes_fit_and_acquisition_stages():
@@ -91,7 +73,6 @@ def test_invalid_candidate_validation_raises_clear_error():
 
 
 def test_ackley_acquisition_step_returns_finite_in_bounds():
-    module = load_ackley_module()
     torch.manual_seed(7)
     np.random.seed(7)
 
@@ -101,19 +82,8 @@ def test_ackley_acquisition_step_returns_finite_in_bounds():
     train_x = torch.tensor(np.random.rand(n_init, dim), dtype=DTYPE)
     train_y = function(-5 + 10 * train_x).unsqueeze(1).to(dtype=DTYPE)
 
-    covar_module = ScaleKernel(RBFKernel(ard_num_dims=dim)).to(dtype=DTYPE)
-    model = SingleTaskGP(
-        train_x,
-        train_y,
-        outcome_transform=Standardize(m=1),
-        covar_module=covar_module,
-    )
-    mll = ExactMarginalLogLikelihood(model.likelihood, model)
-    fit_gpytorch_mll_quiet(mll, model=model, seed=0, iteration=0)
-
-    model.train_x = train_x
-    model.train_y = train_y
-    acquisition = module.CustomAcquisitionFunction(model, train_y, k=3)
+    model = build_independent_gps(train_x, train_y, kernel="rbf", seed=0, iteration=0)
+    acquisition = BeaconAcquisition(model, train_y, k=3)
     bounds = torch.tensor([[0.0] * dim, [1.0] * dim], dtype=DTYPE)
 
     candidate, acq_value = optimize_acqf_quiet(

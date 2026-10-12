@@ -38,6 +38,7 @@ from scipy.stats import spearmanr
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
+from beacon.models import make_likelihood
 from beacon.optimization import DTYPE, fit_gpytorch_mll_quiet
 from beacon.paths import FIGURES_DIR
 
@@ -141,6 +142,8 @@ def fit_surrogate(train_x, train_y):
         train_y,
         outcome_transform=Standardize(m=1),
         covar_module=covar_module,
+        # Explicit BoTorch<=0.11 default likelihood so results do not depend on the BoTorch version.
+        likelihood=make_likelihood("gamma"),
     )
     mll = ExactMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll_quiet(mll, model=model, seed=SEED, iteration=0)
