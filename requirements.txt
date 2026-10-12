@@ -1,16 +1,17 @@
-botorch==0.10.0
-gauche
-gpytorch
-gymnasium
-gymnasium-robotics
-linear-operator
-matplotlib
+# Core dependencies (equivalent to `pip install -e .`).
+# The paper experiments were run with botorch==0.10.0; newer versions are supported
+# because all GP priors are constructed explicitly (see beacon/models.py).
+torch>=2.0
+botorch>=0.10
+gpytorch>=1.11
 numpy
-pandas
-pyDOE2
-pytest
-scikit-learn
 scipy
-seaborn
-torch
-torchvision
+pandas
+
+# Optional extras -- install what you need, e.g. `pip install -e ".[saas,plots,dev]"`:
+#   saas   : botorch[fully_bayesian]  (BEACON-SAAS; BoTorch >= 0.12 uses JAX + NumPyro)
+#   maze   : gymnasium, gymnasium-robotics
+#   chem   : gauche, rdkit           (ESOL fingerprints)
+#   plots  : matplotlib, seaborn     (figures/scripts)
+#   config : pyyaml                  (YAML run configs)
+#   dev    : pytest

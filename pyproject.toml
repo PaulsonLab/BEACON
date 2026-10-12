@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beacon-novelty"
+version = "1.0.0"
+description = "BEACON: Bayesian-optimization-inspired novelty search for expensive black-box systems"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Wei-Ting Tang" },
+  { name = "Ankush Chakrabarty" },
+  { name = "Joel A. Paulson" },
+]
+keywords = ["novelty search", "Bayesian optimization", "Gaussian processes", "materials discovery"]
+dependencies = [
+  "torch>=2.0",
+  "botorch>=0.10",
+  "gpytorch>=1.11",
+  "numpy",
+  "scipy",
+  "pandas",
+]
+
+[project.optional-dependencies]
+# BEACON-SAAS: BoTorch >= 0.12 uses JAX/NumPyro; BoTorch <= 0.11 uses pyro-ppl.
+saas = ["botorch[fully_bayesian]"]
+saas-legacy = ["pyro-ppl"]
+maze = ["gymnasium", "gymnasium-robotics"]
+chem = ["gauche", "rdkit"]
+plots = ["matplotlib", "seaborn"]
+config = ["pyyaml"]
+dev = ["pytest", "pyyaml"]
+all = ["beacon-novelty[saas,maze,plots,config,dev]"]
+
+[project.scripts]
+beacon = "beacon.cli:main"
+
+[project.urls]
+Paper = "https://doi.org/10.1039/d6dd00123h"
+Repository = "https://github.com/PaulsonLab/BEACON"
+
+[tool.setuptools.packages.find]
+include = ["beacon*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "slow: long-running checks (SAAS/NUTS, HOGP); deselect with -m 'not slow'",
+  "gpu: requires a CUDA device (skipped automatically when unavailable)",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::FutureWarning",
+]
