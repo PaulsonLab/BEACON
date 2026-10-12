@@ -28,7 +28,6 @@ where most outcomes concentrate (paper, Fig. 3).
 [New problems](#using-beacon-on-your-own-problem) ·
 [Reproducing the paper](#reproducing-the-paper) ·
 [Testing](#testing) ·
-[Changes](#changes-from-the-original-code) ·
 [Citation](#citation)
 
 ---
@@ -547,7 +546,7 @@ tag (`git checkout v1.0.0`).
 
 **[experiments/README.md](experiments/README.md)** has the full guide: the benchmark problems and
 their settings, the per-experiment scripts, the evaluation metrics, regenerating the figures, and
-what differs from the original results (see also [CHANGELOG.md](CHANGELOG.md)).
+what differs from the original results.
 
 ---
 
@@ -573,17 +572,6 @@ The suite checks that:
 
 Device-dependent tests run once per available device. CUDA variants are reported as *skipped* on
 machines without a GPU, so run the suite on a GPU machine to cover them.
-
----
-
-## Changes from the original code
-
-The refactor keeps the paper's experimental settings. It fixes several verified bugs, most
-importantly a mis-scaled pathwise Thompson sampler (samples were too wide by a factor of
-√outputscale). It also restores compatibility with current pandas, BoTorch and Python, removes
-unused dependencies, and replaces 17 near-duplicate scripts with one tested package.
-**[CHANGELOG.md](CHANGELOG.md) documents every change, how it was verified, and its effect on
-results.**
 
 ---
 

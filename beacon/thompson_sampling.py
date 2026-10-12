@@ -26,7 +26,7 @@ optionally wrapped in a ``ScaleKernel``. Fully Bayesian models (e.g.
 hyperparameter sample (``mcmc_index``; random by default), which yields a
 valid Thompson sample from the hyperparameter-marginalized posterior.
 
-Fixes relative to the original research implementation (see CHANGELOG.md):
+Fixes relative to the original research implementation:
 
 * Fourier features are scaled by ``sqrt(outputscale)`` (previously
   ``outputscale``), so the prior sample has the kernel's variance.

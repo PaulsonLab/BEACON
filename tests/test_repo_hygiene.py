@@ -89,7 +89,6 @@ def test_required_scripts_and_artifacts_exist():
         "experiments/discrete/multi-outcome/oil-ug-beacon.py",
         "experiments/discrete/single-outcome-material/logd-beacon-saas.py",
         "pyproject.toml",
-        "CHANGELOG.md",
         "experiments/discrete/multi-outcome/mnist/mnist-beacon.py",
         "figures/scripts/plot-synthetic.py",
         "figures/scripts/plot-mof.py",

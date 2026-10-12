@@ -85,8 +85,9 @@ python experiments/discrete/multi-outcome/oil-ug-beacon.py --device auto
 | `discrete/multi-outcome/mnist/mnist-beacon.py` | `mnist` | BEACON |
 | `discrete/multi-outcome/mnist/mnist-ug-beacon.py` | `mnist` | UG-BEACON |
 
-`logd-beacon-saas.py` adds `--set saas_sample_mode=mean` to match the original LogD script (see
-[CHANGELOG](../CHANGELOG.md#behavioural-notes-and-options)). Script results go to
+`logd-beacon-saas.py` adds `--set saas_sample_mode=mean` to match the original LogD script, which
+averaged posterior samples over the MCMC draws. (The package default draws one proper Thompson
+sample from a single MCMC draw.) Script results go to
 `results/generated/<problem>/<algorithm>/` unless `--output-dir` is given; the output files are
 described under [Outputs](../README.md#outputs).
 
@@ -94,8 +95,8 @@ described under [Outputs](../README.md#outputs).
 
 ## Benchmark problems
 
-Defaults are the paper settings, verified against the saved results (see
-[CHANGELOG](../CHANGELOG.md#verification-of-the-preserved-paper-settings)). *d* = inputs,
+Defaults are the paper settings, verified against the saved results (checked by
+[`tests/test_problems.py`](../tests/test_problems.py)). *d* = inputs,
 *m* = outcomes, *N* = candidate-set size.
 
 | Problem (`--problem`) | Type | d | m | Initial | Budget | Repl. | k | Reachability regions | Surrogate |
@@ -179,13 +180,11 @@ For example, `results/generated/paper/ackley-4d/coverage.pt` and `cost.pt` corre
 **What to expect.** The code exactly as published with the paper is tagged
 [`v1.0.0`](https://github.com/PaulsonLab/BEACON/tree/v1.0.0); this guide describes version 2.0.0.
 
-
 * Initial designs and metrics match the saved results exactly for the synthetic, noisy Ackley and
   materials/molecule studies (checked by [`tests/test_problems.py`](../tests/test_problems.py)).
 * BEACON's later iterations will not match bit-for-bit. Three bugs in the original Thompson
   sampler and evaluation code were fixed, and random streams differ across library versions.
-* Final reachability should agree within the replicate spread. See
-  [CHANGELOG.md](../CHANGELOG.md) for every change and its effect.
+* Final reachability should agree within the replicate spread.
 * Joint-gas reachability is the original value × 64/63 (a binning fix).
 * The saved oil-sorbent and MNIST plot data came from an earlier script version and cannot be
   regenerated bit-for-bit.
